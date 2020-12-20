@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 2007236093553899578}
   - component: {fileID: 2007236093553899581}
   - component: {fileID: -8293473128983924510}
-  - component: {fileID: 2007236093553899574}
   - component: {fileID: 1213307096916151050}
   - component: {fileID: 2007236093553899575}
   - component: {fileID: 1163449665579007648}
@@ -66,7 +65,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 41a2a14e60155ba4183803f87cb66019, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -118,22 +117,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 2
---- !u!114 &2007236093553899574
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2007236093553899580}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
-  hasSpawned: 0
 --- !u!114 &1213307096916151050
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -146,11 +129,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bef017ad4d87b240828ba5c35030be8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  camera: {fileID: 8932175142991508088}
-  horizontalSensitivity: 1
-  verticalSensitivity: 1
+  id: 0
+  username: 
 --- !u!114 &2007236093553899575
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -163,9 +143,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 190fed0d51d73754bbb4538dc8151a8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
   camera: {fileID: 8932175142991508088}
+  horizontalSensitivity: 0
+  verticalSensitivity: 0
   acceleration: 750
   counterAcceleration: 750
   walkMaxSpeed: 1500
@@ -184,8 +164,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1382d65da938c5419e6834d3795f70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
   camera: {fileID: 8932175142991508088}
   movementSpeed: 25
 --- !u!1 &6406406439542042215

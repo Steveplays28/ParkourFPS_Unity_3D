@@ -5,6 +5,10 @@ public class FpsController : MonoBehaviour
     //Player
     [Header("Player")]
     public new Camera camera;
+    public float horizontalSensitivity;
+    public float verticalSensitivity;
+
+    private Vector3 rotation;
 
     private Rigidbody rigidBody;
     private Vector3 localVelocity;
@@ -142,6 +146,17 @@ public class FpsController : MonoBehaviour
         {
             rigidBody.AddForce(Vector3.up * 1000, ForceMode.Force);
         }
+
+        //Get mouse rotation inputs
+        rotation.y += Input.GetAxis("Mouse X") * horizontalSensitivity;
+        rotation.x += -Input.GetAxis("Mouse Y") * verticalSensitivity;
+    }
+
+    void LateUpdate()
+    {
+        //Set rotation
+        camera.transform.Rotate(rotation);
+        transform.Rotate(new Vector3(transform.rotation.x, rotation.y, transform.rotation.z));
     }
 
     void OnCollisionEnter(Collision collision)
