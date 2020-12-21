@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using ParkourFPS_Server;
 using UnityEngine;
-using ParkourFPS_Dedicated_Server;
 
-public class ClientSend : MonoBehaviour
+public static class ClientSend
 {
     private static void SendTCPData(Packet _packet)
     {
@@ -34,6 +32,20 @@ public class ClientSend : MonoBehaviour
         using (Packet _packet = new Packet((int)ClientPackets.udpTestReceive))
         {
             _packet.Write("Received a UDP packet.");
+
+            SendUDPData(_packet);
+        }
+    }
+
+    public static void PlayerInput(bool[] _inputs)
+    {
+        using (Packet _packet = new Packet((int)ClientPackets.playerInput))
+        {
+            foreach(bool _input in _inputs)
+            {
+                _packet.Write(_input);
+            }
+
             SendUDPData(_packet);
         }
     }

@@ -11,10 +11,7 @@ GameObject:
   - component: {fileID: 2007236093553899576}
   - component: {fileID: 2007236093553899579}
   - component: {fileID: 2007236093553899578}
-  - component: {fileID: 2007236093553899581}
-  - component: {fileID: -8293473128983924510}
   - component: {fileID: 1213307096916151050}
-  - component: {fileID: 2007236093553899575}
   - component: {fileID: 1163449665579007648}
   m_Layer: 0
   m_Name: Player
@@ -87,36 +84,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &2007236093553899581
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2007236093553899580}
-  m_Material: {fileID: 13400000, guid: ef39d4348a290ab4da4c132bcce6a4e1, type: 2}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!54 &-8293473128983924510
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2007236093553899580}
-  serializedVersion: 2
-  m_Mass: 80
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 2
 --- !u!114 &1213307096916151050
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -131,27 +98,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 0
   username: 
---- !u!114 &2007236093553899575
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2007236093553899580}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 190fed0d51d73754bbb4538dc8151a8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  camera: {fileID: 8932175142991508088}
-  horizontalSensitivity: 0
-  verticalSensitivity: 0
-  acceleration: 750
-  counterAcceleration: 750
-  walkMaxSpeed: 1500
-  runMaxSpeed: 2000
-  jumpHeight: 350
-  maxJumps: 2
 --- !u!114 &1163449665579007648
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -159,7 +105,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2007236093553899580}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1382d65da938c5419e6834d3795f70c, type: 3}
   m_Name: 

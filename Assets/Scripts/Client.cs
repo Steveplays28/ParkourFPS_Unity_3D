@@ -1,4 +1,4 @@
-﻿using ParkourFPS_Dedicated_Server;
+﻿using ParkourFPS_Server;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -276,7 +276,9 @@ public class Client : MonoBehaviour
         {
             { (int)ServerPackets.welcome, ClientHandle.Welcome },
             { (int)ServerPackets.udpTest, ClientHandle.UDPTest },
-            { (int)ServerPackets.spawnPlayer, ClientHandle.SpawnPlayer }
+            { (int)ServerPackets.spawnPlayer, ClientHandle.SpawnPlayer },
+            { (int)ServerPackets.playerPosition, ClientHandle.PlayerPosition },
+            { (int)ServerPackets.playerRotation, ClientHandle.PlayerRotation }
         };
 
         Debug.Log($"Initialized packets.");

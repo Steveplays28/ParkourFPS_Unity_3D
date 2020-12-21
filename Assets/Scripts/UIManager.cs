@@ -27,6 +27,7 @@ public class UIManager : MonoBehaviour
     {
         startMenu.SetActive(false);
         usernameField.interactable = false;
+        Camera.main.gameObject.SetActive(false);
         Client.instance.ConnectToServer();
     }
 }

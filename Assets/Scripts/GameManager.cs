@@ -1,5 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Timers;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -8,8 +8,8 @@ public class GameManager : MonoBehaviour
 
     public static Dictionary<int, PlayerManager> players = new Dictionary<int, PlayerManager>();
 
-    public static GameObject playerPrefab;
-    public static Material localPlayerMat;
+    public GameObject playerPrefab;
+    public Material localPlayerMat;
 
     private void Awake()
     {
@@ -39,5 +39,21 @@ public class GameManager : MonoBehaviour
         _player.GetComponent<PlayerManager>().username = _username;
 
         players.Add(_id, _player.GetComponent<PlayerManager>());
+
+        if (_id != Client.instance.myId)
+        {
+            _player.GetComponentInChildren<Camera>().gameObject.SetActive(false);
+        }
+    }
+
+    public void SetPlayerPosition(int _id, Vector3 _position)
+    {
+        Vector3.Lerp(players[_id].transform.position, _position, Time.fixedDeltaTime);
+        players[_id].transform.position = _position;
+    }
+
+    public void SetPlayerRotation(int _id, Quaternion _rotation)
+    {
+        players[_id].transform.rotation = _rotation;
     }
 }

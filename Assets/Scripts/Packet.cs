@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
-namespace ParkourFPS_Dedicated_Server
+namespace ParkourFPS_Server
 {
     /// <summary>Sent from server to client.</summary>
     public enum ServerPackets
@@ -19,8 +19,8 @@ namespace ParkourFPS_Dedicated_Server
     public enum ClientPackets
     {
         welcomeReceived = 1,
-        playerMovement,
-        udpTestReceive
+        udpTestReceive,
+        playerInput
     }
 
     public class Packet : IDisposable
