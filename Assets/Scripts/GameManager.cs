@@ -8,8 +8,8 @@ public class GameManager : MonoBehaviour
 
     public static Dictionary<int, PlayerManager> players = new Dictionary<int, PlayerManager>();
 
-    public GameObject playerPrefab;
-    public Material localPlayerMat;
+    public static GameObject playerPrefab;
+    public static Material localPlayerMat;
 
     private void Awake()
     {
