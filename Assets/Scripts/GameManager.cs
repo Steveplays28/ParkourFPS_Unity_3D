@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Timers;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -46,10 +46,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void DestroyPlayer(int _id)
+    {
+        Destroy(players[_id].gameObject);
+    }
+
     public void SetPlayerPosition(int _id, Vector3 _position)
     {
-        Vector3.Lerp(players[_id].transform.position, _position, Time.fixedDeltaTime);
-        players[_id].transform.position = _position;
+        StartCoroutine(MoveOverSeconds(players[_id].gameObject, _position, Time.deltaTime * 2));
+    }
+
+    private IEnumerator MoveOverSeconds(GameObject objectToMove, Vector3 end, float seconds)
+    {
+        float elapsedTime = 0;
+        Vector3 startingPos = objectToMove.transform.position;
+        while (elapsedTime < seconds)
+        {
+            objectToMove.transform.position = Vector3.Lerp(startingPos, end, (elapsedTime / seconds));
+            elapsedTime += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
     }
 
     public void SetPlayerRotation(int _id, Quaternion _rotation)

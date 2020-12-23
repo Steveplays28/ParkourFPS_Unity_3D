@@ -11,6 +11,7 @@ namespace ParkourFPS_Server
         welcome = 1,
         udpTest,
         spawnPlayer,
+        disconnect,
         playerPosition,
         playerRotation
     }

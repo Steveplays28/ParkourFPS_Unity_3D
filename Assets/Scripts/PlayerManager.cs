@@ -15,6 +15,10 @@ public class PlayerManager : MonoBehaviour
         inputs[3] = Input.GetKey(KeyCode.D);
         inputs[4] = Input.GetKey(KeyCode.Space);
 
+        ////Get mouse rotation inputs
+        //rotation.y += Input.GetAxis("Mouse X") * horizontalSensitivity;
+        //rotation.x += -Input.GetAxis("Mouse Y") * verticalSensitivity;
+
         ClientSend.PlayerInput(inputs);
     }
 }
