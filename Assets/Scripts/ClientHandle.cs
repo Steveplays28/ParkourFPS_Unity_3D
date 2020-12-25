@@ -54,7 +54,8 @@ public static class ClientHandle
     {
         int _id = _packet.ReadInt();
         Quaternion _rotation = _packet.ReadQuaternion();
+        Quaternion _cameraRotation = _packet.ReadQuaternion();
 
-        GameManager.instance.SetPlayerRotation(_id, _rotation);
+        GameManager.instance.SetPlayerRotation(_id, _rotation, _cameraRotation);
     }
 }

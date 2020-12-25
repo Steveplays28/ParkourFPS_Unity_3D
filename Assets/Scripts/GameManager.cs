@@ -68,8 +68,21 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void SetPlayerRotation(int _id, Quaternion _rotation)
+    public void SetPlayerRotation(int _id, Quaternion _playerRotation, Quaternion _cameraRotation)
     {
-        players[_id].transform.rotation = _rotation;
+        StartCoroutine(RotateOverSeconds(players[_id].gameObject, _playerRotation, Time.deltaTime * 2));
+        StartCoroutine(RotateOverSeconds(players[_id].gameObject.GetComponent<PlayerManager>().camera.gameObject, _cameraRotation, Time.deltaTime * 2));
+    }
+
+    private IEnumerator RotateOverSeconds(GameObject objectToMove, Quaternion end, float seconds)
+    {
+        float elapsedTime = 0;
+        Quaternion startingRot = objectToMove.transform.rotation;
+        while (elapsedTime < seconds)
+        {
+            objectToMove.transform.rotation = Quaternion.Lerp(startingRot, end, (elapsedTime / seconds));
+            elapsedTime += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
     }
 }

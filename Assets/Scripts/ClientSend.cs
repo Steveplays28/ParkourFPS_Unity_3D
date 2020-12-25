@@ -37,7 +37,7 @@ public static class ClientSend
         }
     }
 
-    public static void PlayerInput(bool[] _inputs)
+    public static void PlayerInput(bool[] _inputs, Quaternion _mouseRotation)
     {
         using (Packet _packet = new Packet((int)ClientPackets.playerInput))
         {
@@ -45,6 +45,8 @@ public static class ClientSend
             {
                 _packet.Write(_input);
             }
+
+            _packet.Write(_mouseRotation);
 
             SendUDPData(_packet);
         }
