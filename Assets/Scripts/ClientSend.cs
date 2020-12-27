@@ -1,14 +1,19 @@
-﻿using ParkourFPS_Server;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public static class ClientSend
+public class ClientSend : MonoBehaviour
 {
+    /// <summary>Sends a packet to the server via TCP.</summary>
+    /// <param name="_packet">The packet to send to the sever.</param>
     private static void SendTCPData(Packet _packet)
     {
         _packet.WriteLength();
         Client.instance.tcp.SendData(_packet);
     }
 
+    /// <summary>Sends a packet to the server via UDP.</summary>
+    /// <param name="_packet">The packet to send to the sever.</param>
     private static void SendUDPData(Packet _packet)
     {
         _packet.WriteLength();
@@ -16,6 +21,7 @@ public static class ClientSend
     }
 
     #region Packets
+    /// <summary>Lets the server know that the welcome message was received.</summary>
     public static void WelcomeReceived()
     {
         using (Packet _packet = new Packet((int)ClientPackets.welcomeReceived))
@@ -27,28 +33,48 @@ public static class ClientSend
         }
     }
 
-    public static void UDPTestReceived()
+    /// <summary>Sends player input to the server.</summary>
+    /// <param name="_inputs"></param>
+    public static void PlayerMovement(bool[] _inputs)
     {
-        using (Packet _packet = new Packet((int)ClientPackets.udpTestReceive))
+        using (Packet _packet = new Packet((int)ClientPackets.playerMovement))
         {
-            _packet.Write("Received a UDP packet.");
+            _packet.Write(_inputs.Length);
+            foreach (bool _input in _inputs)
+            {
+                _packet.Write(_input);
+            }
+            _packet.Write(GameManager.players[Client.instance.myId].transform.rotation);
 
             SendUDPData(_packet);
         }
     }
 
-    public static void PlayerInput(bool[] _inputs, Quaternion _mouseRotation)
+    public static void PlayerShoot(Vector3 _facing)
     {
-        using (Packet _packet = new Packet((int)ClientPackets.playerInput))
+        using (Packet _packet = new Packet((int)ClientPackets.playerShoot))
         {
-            foreach(bool _input in _inputs)
-            {
-                _packet.Write(_input);
-            }
+            _packet.Write(_facing);
 
-            _packet.Write(_mouseRotation);
+            SendTCPData(_packet);
+        }
+    }
 
-            SendUDPData(_packet);
+    public static void PlayerThrowItem(Vector3 _facing)
+    {
+        using (Packet _packet = new Packet((int)ClientPackets.playerThrowItem))
+        {
+            _packet.Write(_facing);
+
+            SendTCPData(_packet);
+        }
+    }
+
+    public static void PlayerJump()
+    {
+        using (Packet _packet = new Packet((int)ClientPackets.playerJump))
+        {
+            SendTCPData(_packet);
         }
     }
     #endregion

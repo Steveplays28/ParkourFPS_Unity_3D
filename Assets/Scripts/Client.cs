@@ -1,9 +1,9 @@
-﻿using ParkourFPS_Server;
-using System;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
-using UnityEngine;
+using System;
 
 public class Client : MonoBehaviour
 {
@@ -11,7 +11,7 @@ public class Client : MonoBehaviour
     public static int dataBufferSize = 4096;
 
     public string ip = "127.0.0.1";
-    public int port = 7777;
+    public int port = 26950;
     public int myId = 0;
     public TCP tcp;
     public UDP udp;
@@ -28,28 +28,32 @@ public class Client : MonoBehaviour
         }
         else if (instance != this)
         {
-            Debug.LogWarning("Instance already exists, destroying object!");
+            Debug.Log("Instance already exists, destroying object!");
             Destroy(this);
         }
     }
 
-    private void Start()
-    {
-        tcp = new TCP();
-        udp = new UDP();
-    }
-
     private void OnApplicationQuit()
     {
-        Disconnect();
+        Disconnect(); // Disconnect when the game is closed
     }
 
-    public void ConnectToServer()
+    /// <summary>Attempts to connect to the server.</summary>
+    public void ConnectToServer(string _ip, int _port)
     {
+        ip = _ip;
+        port = _port;
+
+        Debug.Log(ip);
+        Debug.Log(port);
+
+        tcp = new TCP();
+        udp = new UDP();
+
         InitializeClientData();
 
         isConnected = true;
-        tcp.Connect();
+        tcp.Connect(); // Connect tcp, udp gets connected once tcp is done
     }
 
     public class TCP
@@ -60,6 +64,7 @@ public class Client : MonoBehaviour
         private Packet receivedData;
         private byte[] receiveBuffer;
 
+        /// <summary>Attempts to connect to the server via TCP.</summary>
         public void Connect()
         {
             socket = new TcpClient
@@ -72,6 +77,7 @@ public class Client : MonoBehaviour
             socket.BeginConnect(instance.ip, instance.port, ConnectCallback, socket);
         }
 
+        /// <summary>Initializes the newly connected client's TCP-related info.</summary>
         private void ConnectCallback(IAsyncResult _result)
         {
             socket.EndConnect(_result);
@@ -88,21 +94,24 @@ public class Client : MonoBehaviour
             stream.BeginRead(receiveBuffer, 0, dataBufferSize, ReceiveCallback, null);
         }
 
+        /// <summary>Sends data to the client via TCP.</summary>
+        /// <param name="_packet">The packet to send.</param>
         public void SendData(Packet _packet)
         {
             try
             {
                 if (socket != null)
                 {
-                    stream.BeginWrite(_packet.ToArray(), 0, _packet.Length(), null, null);
+                    stream.BeginWrite(_packet.ToArray(), 0, _packet.Length(), null, null); // Send data to server
                 }
             }
             catch (Exception _ex)
             {
-                Debug.LogError($"Error sending data to server via TCP: {_ex}");
+                Debug.Log($"Error sending data to server via TCP: {_ex}");
             }
         }
 
+        /// <summary>Reads incoming data from the stream.</summary>
         private void ReceiveCallback(IAsyncResult _result)
         {
             try
@@ -117,7 +126,7 @@ public class Client : MonoBehaviour
                 byte[] _data = new byte[_byteLength];
                 Array.Copy(receiveBuffer, _data, _byteLength);
 
-                receivedData.Reset(HandleData(_data));
+                receivedData.Reset(HandleData(_data)); // Reset receivedData if all data was handled
                 stream.BeginRead(receiveBuffer, 0, dataBufferSize, ReceiveCallback, null);
             }
             catch
@@ -126,6 +135,8 @@ public class Client : MonoBehaviour
             }
         }
 
+        /// <summary>Prepares received data to be used by the appropriate packet handler methods.</summary>
+        /// <param name="_data">The recieved data.</param>
         private bool HandleData(byte[] _data)
         {
             int _packetLength = 0;
@@ -134,44 +145,50 @@ public class Client : MonoBehaviour
 
             if (receivedData.UnreadLength() >= 4)
             {
+                // If client's received data contains a packet
                 _packetLength = receivedData.ReadInt();
                 if (_packetLength <= 0)
                 {
-                    return true;
+                    // If packet contains no data
+                    return true; // Reset receivedData instance to allow it to be reused
                 }
             }
 
             while (_packetLength > 0 && _packetLength <= receivedData.UnreadLength())
             {
+                // While packet contains data AND packet data length doesn't exceed the length of the packet we're reading
                 byte[] _packetBytes = receivedData.ReadBytes(_packetLength);
                 ThreadManager.ExecuteOnMainThread(() =>
                 {
                     using (Packet _packet = new Packet(_packetBytes))
                     {
                         int _packetId = _packet.ReadInt();
-                        packetHandlers[_packetId](_packet);
+                        packetHandlers[_packetId](_packet); // Call appropriate method to handle the packet
                     }
                 });
 
-                _packetLength = 0;
+                _packetLength = 0; // Reset packet length
                 if (receivedData.UnreadLength() >= 4)
                 {
+                    // If client's received data contains another packet
                     _packetLength = receivedData.ReadInt();
                     if (_packetLength <= 0)
                     {
-                        return true;
+                        // If packet contains no data
+                        return true; // Reset receivedData instance to allow it to be reused
                     }
                 }
             }
 
             if (_packetLength <= 1)
             {
-                return true;
+                return true; // Reset receivedData instance to allow it to be reused
             }
 
             return false;
         }
 
+        /// <summary>Disconnects from the server and cleans up the TCP connection.</summary>
         private void Disconnect()
         {
             instance.Disconnect();
@@ -193,6 +210,8 @@ public class Client : MonoBehaviour
             endPoint = new IPEndPoint(IPAddress.Parse(instance.ip), instance.port);
         }
 
+        /// <summary>Attempts to connect to the server via UDP.</summary>
+        /// <param name="_localPort">The port number to bind the UDP socket to.</param>
         public void Connect(int _localPort)
         {
             socket = new UdpClient(_localPort);
@@ -206,11 +225,13 @@ public class Client : MonoBehaviour
             }
         }
 
+        /// <summary>Sends data to the client via UDP.</summary>
+        /// <param name="_packet">The packet to send.</param>
         public void SendData(Packet _packet)
         {
             try
             {
-                _packet.InsertInt(instance.myId);
+                _packet.InsertInt(instance.myId); // Insert the client's ID at the start of the packet
                 if (socket != null)
                 {
                     socket.BeginSend(_packet.ToArray(), _packet.Length(), null, null);
@@ -222,6 +243,7 @@ public class Client : MonoBehaviour
             }
         }
 
+        /// <summary>Receives incoming UDP data.</summary>
         private void ReceiveCallback(IAsyncResult _result)
         {
             try
@@ -243,6 +265,8 @@ public class Client : MonoBehaviour
             }
         }
 
+        /// <summary>Prepares received data to be used by the appropriate packet handler methods.</summary>
+        /// <param name="_data">The recieved data.</param>
         private void HandleData(byte[] _data)
         {
             using (Packet _packet = new Packet(_data))
@@ -256,11 +280,12 @@ public class Client : MonoBehaviour
                 using (Packet _packet = new Packet(_data))
                 {
                     int _packetId = _packet.ReadInt();
-                    packetHandlers[_packetId](_packet);
+                    packetHandlers[_packetId](_packet); // Call appropriate method to handle the packet
                 }
             });
         }
 
+        /// <summary>Disconnects from the server and cleans up the UDP connection.</summary>
         private void Disconnect()
         {
             instance.Disconnect();
@@ -270,21 +295,32 @@ public class Client : MonoBehaviour
         }
     }
 
+    /// <summary>Initializes all necessary client data.</summary>
     private void InitializeClientData()
     {
         packetHandlers = new Dictionary<int, PacketHandler>()
         {
             { (int)ServerPackets.welcome, ClientHandle.Welcome },
-            { (int)ServerPackets.udpTest, ClientHandle.UDPTest },
             { (int)ServerPackets.spawnPlayer, ClientHandle.SpawnPlayer },
-            { (int)ServerPackets.disconnect, ClientHandle.Disconnect },
             { (int)ServerPackets.playerPosition, ClientHandle.PlayerPosition },
-            { (int)ServerPackets.playerRotation, ClientHandle.PlayerRotation }
+            { (int)ServerPackets.playerRotation, ClientHandle.PlayerRotation },
+            { (int)ServerPackets.playerDisconnected, ClientHandle.PlayerDisconnected },
+            { (int)ServerPackets.playerHealth, ClientHandle.PlayerHealth },
+            { (int)ServerPackets.playerRespawned, ClientHandle.PlayerRespawned },
+            { (int)ServerPackets.createItemSpawner, ClientHandle.CreateItemSpawner },
+            { (int)ServerPackets.itemSpawned, ClientHandle.ItemSpawned },
+            { (int)ServerPackets.itemPickedUp, ClientHandle.ItemPickedUp },
+            { (int)ServerPackets.spawnProjectile, ClientHandle.SpawnProjectile },
+            { (int)ServerPackets.projectilePosition, ClientHandle.ProjectilePosition },
+            { (int)ServerPackets.projectileExploded, ClientHandle.ProjectileExploded },
+            { (int)ServerPackets.spawnEnemy, ClientHandle.SpawnEnemy },
+            { (int)ServerPackets.enemyPosition, ClientHandle.EnemyPosition },
+            { (int)ServerPackets.enemyHealth, ClientHandle.EnemyHealth },
         };
-
-        Debug.Log($"Initialized packets.");
+        Debug.Log("Initialized packets.");
     }
 
+    /// <summary>Disconnects from the server and stops all network traffic.</summary>
     private void Disconnect()
     {
         if (isConnected)

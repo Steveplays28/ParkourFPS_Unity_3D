@@ -2,60 +2,61 @@
 
 public class CameraController : MonoBehaviour
 {
-    //Player
-    [Header("Player")]
-    public new Camera camera;
+    public PlayerManager player;
+    public float sensitivity = 100f;
+    public float clampAngle = 85f;
 
-    private Rigidbody rigidBody;
+    private float verticalRotation;
+    private float horizontalRotation;
 
-    //Movement
-    [Header("Movement")]
-    public int movementSpeed;
-
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
-
-        rigidBody = gameObject.GetComponent<Rigidbody>();
-
-        rigidBody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
-        rigidBody.isKinematic = true;
+        verticalRotation = transform.localEulerAngles.x;
+        horizontalRotation = player.transform.eulerAngles.y;
     }
 
-    void OnEnable()
+    private void Update()
     {
-        Start();
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            ToggleCursorMode();
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void LateUpdate()
     {
-        //Movement
-        if (Input.GetKey(KeyCode.W))
+        if (Cursor.lockState == CursorLockMode.Locked)
         {
-            transform.position += camera.transform.forward * Time.deltaTime * movementSpeed;
+            Look();
         }
-        if (Input.GetKey(KeyCode.S))
+        Debug.DrawRay(transform.position, transform.forward * 2, Color.red);
+    }
+
+    private void Look()
+    {
+        float _mouseVertical = -Input.GetAxis("Mouse Y");
+        float _mouseHorizontal = Input.GetAxis("Mouse X");
+
+        verticalRotation += _mouseVertical * sensitivity * Time.deltaTime;
+        horizontalRotation += _mouseHorizontal * sensitivity * Time.deltaTime;
+
+        verticalRotation = Mathf.Clamp(verticalRotation, -clampAngle, clampAngle);
+
+        transform.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
+        player.transform.rotation = Quaternion.Euler(0f, horizontalRotation, 0f);
+    }
+
+    private void ToggleCursorMode()
+    {
+        Cursor.visible = !Cursor.visible;
+
+        if (Cursor.lockState == CursorLockMode.None)
         {
-            transform.position += -camera.transform.forward * Time.deltaTime * movementSpeed;
+            Cursor.lockState = CursorLockMode.Locked;
         }
-        if (Input.GetKey(KeyCode.A))
+        else
         {
-            transform.position += -camera.transform.right * Time.deltaTime * movementSpeed;
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            transform.position += camera.transform.right * Time.deltaTime * movementSpeed;
-        }
-        if (Input.GetKey(KeyCode.Space))
-        {
-            transform.position += Vector3.up * Time.deltaTime * movementSpeed;
-        }
-        if (Input.GetKey(KeyCode.LeftControl))
-        {
-            transform.position += Vector3.down * Time.deltaTime * movementSpeed;
+            Cursor.lockState = CursorLockMode.None;
         }
     }
 }

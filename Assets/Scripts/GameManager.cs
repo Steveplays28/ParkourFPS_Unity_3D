@@ -7,9 +7,15 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
 
     public static Dictionary<int, PlayerManager> players = new Dictionary<int, PlayerManager>();
+    public static Dictionary<int, ItemSpawner> itemSpawners = new Dictionary<int, ItemSpawner>();
+    public static Dictionary<int, ProjectileManager> projectiles = new Dictionary<int, ProjectileManager>();
+    public static Dictionary<int, EnemyManager> enemies = new Dictionary<int, EnemyManager>();
 
+    public GameObject localPlayerPrefab;
     public GameObject playerPrefab;
-    public Material localPlayerMat;
+    public GameObject itemSpawnerPrefab;
+    public GameObject projectilePrefab;
+    public GameObject enemyPrefab;
 
     private void Awake()
     {
@@ -19,70 +25,50 @@ public class GameManager : MonoBehaviour
         }
         else if (instance != this)
         {
-            Debug.LogWarning("Instance already exists, destroying object!");
+            Debug.Log("Instance already exists, destroying object!");
             Destroy(this);
         }
     }
 
-    public void SpawnPlayer(int _id, string _username, Vector3 _spawnPosition, Quaternion _spawnRotation)
+    /// <summary>Spawns a player.</summary>
+    /// <param name="_id">The player's ID.</param>
+    /// <param name="_name">The player's name.</param>
+    /// <param name="_position">The player's starting position.</param>
+    /// <param name="_rotation">The player's starting rotation.</param>
+    public void SpawnPlayer(int _id, string _username, Vector3 _position, Quaternion _rotation)
     {
         GameObject _player;
-
-        _player = Instantiate(playerPrefab, _spawnPosition, _spawnRotation);
-
         if (_id == Client.instance.myId)
         {
-            _player.GetComponent<Renderer>().material = localPlayerMat;
+            _player = Instantiate(localPlayerPrefab, _position, _rotation);
+        }
+        else
+        {
+            _player = Instantiate(playerPrefab, _position, _rotation);
         }
 
-        _player.GetComponent<PlayerManager>().id = _id;
-        _player.GetComponent<PlayerManager>().username = _username;
-
+        _player.GetComponent<PlayerManager>().Initialize(_id, _username);
         players.Add(_id, _player.GetComponent<PlayerManager>());
-
-        if (_id != Client.instance.myId)
-        {
-            _player.GetComponentInChildren<Camera>().gameObject.SetActive(false);
-        }
     }
 
-    public void DestroyPlayer(int _id)
+    public void CreateItemSpawner(int _spawnerId, Vector3 _position, bool _hasItem)
     {
-        Destroy(players[_id].gameObject);
+        GameObject _spawner = Instantiate(itemSpawnerPrefab, _position, itemSpawnerPrefab.transform.rotation);
+        _spawner.GetComponent<ItemSpawner>().Initialize(_spawnerId, _hasItem);
+        itemSpawners.Add(_spawnerId, _spawner.GetComponent<ItemSpawner>());
     }
 
-    public void SetPlayerPosition(int _id, Vector3 _position)
+    public void SpawnProjectile(int _id, Vector3 _position)
     {
-        StartCoroutine(MoveOverSeconds(players[_id].gameObject, _position, Time.deltaTime * 2));
+        GameObject _projectile = Instantiate(projectilePrefab, _position, Quaternion.identity);
+        _projectile.GetComponent<ProjectileManager>().Initialize(_id);
+        projectiles.Add(_id, _projectile.GetComponent<ProjectileManager>());
     }
 
-    private IEnumerator MoveOverSeconds(GameObject objectToMove, Vector3 end, float seconds)
+    public void SpawnEnemy(int _id, Vector3 _position)
     {
-        float elapsedTime = 0;
-        Vector3 startingPos = objectToMove.transform.position;
-        while (elapsedTime < seconds)
-        {
-            objectToMove.transform.position = Vector3.Lerp(startingPos, end, (elapsedTime / seconds));
-            elapsedTime += Time.deltaTime;
-            yield return new WaitForEndOfFrame();
-        }
-    }
-
-    public void SetPlayerRotation(int _id, Quaternion _playerRotation, Quaternion _cameraRotation)
-    {
-        StartCoroutine(RotateOverSeconds(players[_id].gameObject, _playerRotation, Time.deltaTime * 2));
-        StartCoroutine(RotateOverSeconds(players[_id].gameObject.GetComponent<PlayerManager>().camera.gameObject, _cameraRotation, Time.deltaTime * 2));
-    }
-
-    private IEnumerator RotateOverSeconds(GameObject objectToMove, Quaternion end, float seconds)
-    {
-        float elapsedTime = 0;
-        Quaternion startingRot = objectToMove.transform.rotation;
-        while (elapsedTime < seconds)
-        {
-            objectToMove.transform.rotation = Quaternion.Lerp(startingRot, end, (elapsedTime / seconds));
-            elapsedTime += Time.deltaTime;
-            yield return new WaitForEndOfFrame();
-        }
+        GameObject _enemy = Instantiate(enemyPrefab, _position, Quaternion.identity);
+        _enemy.GetComponent<EnemyManager>().Initialize(_id);
+        enemies.Add(_id, _enemy.GetComponent<EnemyManager>());
     }
 }
