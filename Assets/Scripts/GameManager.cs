@@ -49,6 +49,12 @@ public class GameManager : MonoBehaviour
 
         _player.GetComponent<PlayerManager>().Initialize(_id, _username);
         players.Add(_id, _player.GetComponent<PlayerManager>());
+
+        //On connected to server
+        if (_id == Client.instance.myId)
+        {
+            UIManager.instance.OnConnected();
+        }
     }
 
     public void CreateItemSpawner(int _spawnerId, Vector3 _position, bool _hasItem)

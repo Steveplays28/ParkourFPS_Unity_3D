@@ -35,7 +35,7 @@ public class ClientSend : MonoBehaviour
 
     /// <summary>Sends player input to the server.</summary>
     /// <param name="_inputs"></param>
-    public static void PlayerMovement(bool[] _inputs)
+    public static void PlayerMovement(bool[] _inputs, Quaternion _playerRotation, Quaternion _cameraRotation)
     {
         using (Packet _packet = new Packet((int)ClientPackets.playerMovement))
         {
@@ -44,7 +44,8 @@ public class ClientSend : MonoBehaviour
             {
                 _packet.Write(_input);
             }
-            _packet.Write(GameManager.players[Client.instance.myId].transform.rotation);
+            _packet.Write(_playerRotation);
+            _packet.Write(_cameraRotation);
 
             SendUDPData(_packet);
         }
@@ -73,6 +74,22 @@ public class ClientSend : MonoBehaviour
     public static void PlayerJump()
     {
         using (Packet _packet = new Packet((int)ClientPackets.playerJump))
+        {
+            SendTCPData(_packet);
+        }
+    }
+
+    public static void PlayerRun()
+    {
+        using (Packet _packet = new Packet((int)ClientPackets.playerRun))
+        {
+            SendTCPData(_packet);
+        }
+    }
+
+    public static void PlayerCrouch()
+    {
+        using (Packet _packet = new Packet((int)ClientPackets.playerCrouch))
         {
             SendTCPData(_packet);
         }

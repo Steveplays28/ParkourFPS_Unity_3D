@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
 using System;
+using UnityEngine.SceneManagement;
 
 public class Client : MonoBehaviour
 {
@@ -321,13 +322,19 @@ public class Client : MonoBehaviour
     }
 
     /// <summary>Disconnects from the server and stops all network traffic.</summary>
-    private void Disconnect()
+    public void Disconnect()
     {
         if (isConnected)
         {
             isConnected = false;
             tcp.socket.Close();
             udp.socket.Close();
+
+            SceneManager.LoadSceneAsync(0, LoadSceneMode.Single);
+            GameManager.players = new Dictionary<int, PlayerManager>();
+            GameManager.itemSpawners = new Dictionary<int, ItemSpawner>();
+            GameManager.projectiles = new Dictionary<int, ProjectileManager>();
+            GameManager.enemies = new Dictionary<int, EnemyManager>();
 
             Debug.Log("Disconnected from server.");
         }

@@ -14,15 +14,12 @@ public class PlayerManager : MonoBehaviour
         id = _id;
         username = _username;
         health = maxHealth;
-
-        Camera.main.gameObject.SetActive(false);
-
-        UIManager.instance.crosshair.SetActive(true);
     }
 
     public void SetHealth(float _health)
     {
         health = _health;
+        UIManager.instance.healthBar.value = health;
 
         if (health <= 0f)
         {

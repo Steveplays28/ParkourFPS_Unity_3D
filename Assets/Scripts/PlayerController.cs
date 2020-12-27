@@ -2,23 +2,46 @@
 
 public class PlayerController : MonoBehaviour
 {
-    public Transform camTransform;
+    public new Camera camera;
 
     private void Update()
     {
+        //Shooting
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            ClientSend.PlayerShoot(camTransform.forward);
+            ClientSend.PlayerShoot(camera.transform.forward);
         }
 
+        //Throwing projectiles
         if (Input.GetKeyDown(KeyCode.Mouse1))
         {
-            ClientSend.PlayerThrowItem(camTransform.forward);
+            ClientSend.PlayerThrowItem(camera.transform.forward);
         }
 
+        //Jumping
         if (Input.GetKeyDown(KeyCode.Space))
         {
             ClientSend.PlayerJump();
+        }
+
+        //Running
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            ClientSend.PlayerRun();
+        }
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            ClientSend.PlayerRun();
+        }
+
+        //Crouching
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            ClientSend.PlayerCrouch();
+        }
+        if (Input.GetKeyUp(KeyCode.LeftControl))
+        {
+            ClientSend.PlayerCrouch();
         }
     }
 
@@ -38,6 +61,6 @@ public class PlayerController : MonoBehaviour
             Input.GetKey(KeyCode.D),
         };
 
-        ClientSend.PlayerMovement(_inputs);
+        ClientSend.PlayerMovement(_inputs, transform.rotation, camera.transform.rotation);
     }
 }
