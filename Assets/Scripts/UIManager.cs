@@ -15,8 +15,10 @@ public class UIManager : MonoBehaviour
     public Button disconnectButton;
 
     [Header("In-game")]
-    public Image crosshair;
+    public GameObject inGameUI;
     public Slider healthBar;
+    public Text weaponName;
+    public Text ammoCounter;
 
     private void Awake()
     {
@@ -57,10 +59,7 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        if (_ip.Length == 9 && _port.ToString().Length == 5)
-        {
-            Client.instance.ConnectToServer(_ip, _port);
-        }
+        Client.instance.ConnectToServer(_ip, _port);
     }
 
     public void OnConnected()
@@ -72,9 +71,11 @@ public class UIManager : MonoBehaviour
         Camera.main.gameObject.SetActive(false);
 
         //Enable in-game menus
-        disconnectButton.gameObject.SetActive(true);
-        crosshair.gameObject.SetActive(true);
-        healthBar.gameObject.SetActive(true);
+        inGameUI.SetActive(true);
+        for (int i = 0; i < inGameUI.transform.childCount; i++)
+        {
+            inGameUI.transform.GetChild(i).gameObject.SetActive(true);
+        }
         healthBar.maxValue = GameManager.players[Client.instance.myId].maxHealth;
         healthBar.value = GameManager.players[Client.instance.myId].health;
     }
@@ -82,5 +83,15 @@ public class UIManager : MonoBehaviour
     public void DisconnectFromServer()
     {
         Client.instance.Disconnect();
+    }
+
+    public void UpdateWeapon()
+    {
+        weaponName.text = GameManager.players[Client.instance.myId].weaponManager.weaponName;
+    }
+
+    public void UpdateAmmo()
+    {
+        ammoCounter.text = string.Concat(GameManager.players[Client.instance.myId].weaponManager.currentAmmo.ToString(), "/", GameManager.players[Client.instance.myId].weaponManager.maxAmmo.ToString());
     }
 }

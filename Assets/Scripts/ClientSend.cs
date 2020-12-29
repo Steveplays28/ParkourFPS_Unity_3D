@@ -51,12 +51,10 @@ public class ClientSend : MonoBehaviour
         }
     }
 
-    public static void PlayerShoot(Vector3 _facing)
+    public static void PlayerShoot()
     {
         using (Packet _packet = new Packet((int)ClientPackets.playerShoot))
         {
-            _packet.Write(_facing);
-
             SendTCPData(_packet);
         }
     }
@@ -90,6 +88,24 @@ public class ClientSend : MonoBehaviour
     public static void PlayerCrouch()
     {
         using (Packet _packet = new Packet((int)ClientPackets.playerCrouch))
+        {
+            SendTCPData(_packet);
+        }
+    }
+
+    public static void PlayerEquipWeapon(int _weaponId)
+    {
+        using (Packet _packet = new Packet((int)ClientPackets.playerEquipWeapon))
+        {
+            _packet.Write(_weaponId);
+
+            SendTCPData(_packet);
+        }
+    }
+
+    public static void PlayerReloadWeapon()
+    {
+        using (Packet _packet = new Packet((int)ClientPackets.playerReloadWeapon))
         {
             SendTCPData(_packet);
         }

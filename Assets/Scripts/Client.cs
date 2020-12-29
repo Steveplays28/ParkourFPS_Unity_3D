@@ -317,6 +317,9 @@ public class Client : MonoBehaviour
             { (int)ServerPackets.spawnEnemy, ClientHandle.SpawnEnemy },
             { (int)ServerPackets.enemyPosition, ClientHandle.EnemyPosition },
             { (int)ServerPackets.enemyHealth, ClientHandle.EnemyHealth },
+            { (int)ServerPackets.playerShoot, ClientHandle.PlayerShoot },
+            { (int)ServerPackets.playerEquipWeapon, ClientHandle.PlayerEquipWeapon },
+            { (int)ServerPackets.playerReloadWeapon, ClientHandle.PlayerReloadWeapon },
         };
         Debug.Log("Initialized packets.");
     }

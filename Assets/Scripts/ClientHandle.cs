@@ -42,11 +42,13 @@ public class ClientHandle : MonoBehaviour
     public static void PlayerRotation(Packet _packet)
     {
         int _id = _packet.ReadInt();
-        Quaternion _rotation = _packet.ReadQuaternion();
+        Quaternion _playerRotation = _packet.ReadQuaternion();
+        Quaternion _cameraRotation = _packet.ReadQuaternion();
 
         if (GameManager.players.TryGetValue(_id, out PlayerManager _player))
         {
-            _player.transform.rotation = _rotation;
+            _player.transform.rotation = _playerRotation;
+            _player.camera.transform.rotation = _cameraRotation;
         }
     }
 
@@ -152,5 +154,27 @@ public class ClientHandle : MonoBehaviour
         float _health = _packet.ReadFloat();
 
         GameManager.enemies[_enemyId].SetHealth(_health);
+    }
+
+    public static void PlayerShoot(Packet _packet)
+    {
+        int _id = _packet.ReadInt();
+
+        GameManager.players[_id].weaponManager.Shoot();
+    }
+
+    public static void PlayerEquipWeapon(Packet _packet)
+    {
+        int _id = _packet.ReadInt();
+        int _weaponId = _packet.ReadInt();
+
+        GameManager.players[_id].EquipWeapon(_weaponId);
+    }
+
+    public static void PlayerReloadWeapon(Packet _packet)
+    {
+        int _id = _packet.ReadInt();
+
+        GameManager.players[_id].weaponManager.Reload();
     }
 }

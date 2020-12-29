@@ -8,6 +8,8 @@ public class PlayerManager : MonoBehaviour
     public float maxHealth = 100f;
     public int itemCount = 0;
     public MeshRenderer model;
+    public WeaponManager weaponManager;
+    public new Camera camera;
 
     public void Initialize(int _id, string _username)
     {
@@ -19,7 +21,10 @@ public class PlayerManager : MonoBehaviour
     public void SetHealth(float _health)
     {
         health = _health;
-        UIManager.instance.healthBar.value = health;
+        if (id == Client.instance.myId)
+        {
+            UIManager.instance.healthBar.value = health;
+        }
 
         if (health <= 0f)
         {
@@ -29,6 +34,7 @@ public class PlayerManager : MonoBehaviour
 
     public void Die()
     {
+        weaponManager.CancelReload();
         model.enabled = false;
     }
 
@@ -36,5 +42,29 @@ public class PlayerManager : MonoBehaviour
     {
         model.enabled = true;
         SetHealth(maxHealth);
+    }
+
+    public void EquipWeapon(int _weaponId)
+    {
+        if (weaponManager.isReloading)
+        {
+            weaponManager.CancelReload();
+        }
+
+        WeaponManager[] _weapons = GetComponentsInChildren<WeaponManager>(true);
+
+        foreach (WeaponManager _weapon in _weapons)
+        {
+            _weapon.gameObject.SetActive(false);
+        }
+
+        weaponManager = _weapons[_weaponId];
+        _weapons[_weaponId].gameObject.SetActive(true);
+
+        if (id == Client.instance.myId)
+        {
+            UIManager.instance.UpdateWeapon();
+            UIManager.instance.UpdateAmmo();
+        }
     }
 }
