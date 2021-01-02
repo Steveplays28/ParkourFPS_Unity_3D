@@ -7,25 +7,6 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        //Shooting weapons
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            ClientSend.PlayerShoot();
-            playerManager.weaponManager.Shoot();
-        }
-
-        //Throwing projectiles
-        if (Input.GetKeyDown(KeyCode.Mouse1))
-        {
-            ClientSend.PlayerThrowItem(camera.transform.forward);
-        }
-
-        //Jumping
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            ClientSend.PlayerJump();
-        }
-
         //Running
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
@@ -36,38 +17,65 @@ public class PlayerController : MonoBehaviour
             ClientSend.PlayerRun();
         }
 
-        //Crouching
-        if (Input.GetKeyDown(KeyCode.LeftControl))
+        if (playerManager.health > 0)
         {
-            ClientSend.PlayerCrouch();
-        }
-        if (Input.GetKeyUp(KeyCode.LeftControl))
-        {
-            ClientSend.PlayerCrouch();
-        }
+            //Shooting weapons
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                ClientSend.PlayerShoot();
+                playerManager.weaponManager.Shoot();
+            }
+            if (Input.GetKeyUp(KeyCode.Mouse0) && playerManager.weaponManager.isAutomatic)
+            {
+                ClientSend.PlayerShoot();
+                playerManager.weaponManager.Shoot();
+            }
 
-        //Equipping weapons
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            ClientSend.PlayerEquipWeapon(0);
-            playerManager.EquipWeapon(0);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            ClientSend.PlayerEquipWeapon(1);
-            playerManager.EquipWeapon(1);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            ClientSend.PlayerEquipWeapon(2);
-            playerManager.EquipWeapon(2);
-        }
+            //Throwing projectiles
+            if (Input.GetKeyDown(KeyCode.Mouse1))
+            {
+                ClientSend.PlayerThrowItem(camera.transform.forward);
+            }
 
-        //Reloading weapons
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            ClientSend.PlayerReloadWeapon();
-            playerManager.weaponManager.Reload();
+            //Jumping
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                ClientSend.PlayerJump();
+            }
+
+            //Crouching
+            if (Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                ClientSend.PlayerCrouch();
+            }
+            if (Input.GetKeyUp(KeyCode.LeftControl))
+            {
+                ClientSend.PlayerCrouch();
+            }
+
+            //Equipping weapons
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                ClientSend.PlayerEquipWeapon(0);
+                playerManager.EquipWeapon(0);
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                ClientSend.PlayerEquipWeapon(1);
+                playerManager.EquipWeapon(1);
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                ClientSend.PlayerEquipWeapon(2);
+                playerManager.EquipWeapon(2);
+            }
+
+            //Reloading weapons
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                ClientSend.PlayerReloadWeapon();
+                playerManager.weaponManager.Reload();
+            }
         }
     }
 

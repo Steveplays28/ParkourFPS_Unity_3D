@@ -78,6 +78,10 @@ public class UIManager : MonoBehaviour
         }
         healthBar.maxValue = GameManager.players[Client.instance.myId].maxHealth;
         healthBar.value = GameManager.players[Client.instance.myId].health;
+
+        //Hide cursor
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void DisconnectFromServer()
