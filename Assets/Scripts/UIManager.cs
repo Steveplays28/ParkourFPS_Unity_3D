@@ -1,6 +1,9 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+using DG.Tweening;
 
 public class UIManager : MonoBehaviour
 {
@@ -19,6 +22,7 @@ public class UIManager : MonoBehaviour
     public Slider healthBar;
     public Text weaponName;
     public Text ammoCounter;
+    public Volume volume;
 
     private void Awake()
     {
@@ -97,5 +101,13 @@ public class UIManager : MonoBehaviour
     public void UpdateAmmo()
     {
         ammoCounter.text = string.Concat(GameManager.players[Client.instance.myId].weaponManager.currentAmmo.ToString(), "/", GameManager.players[Client.instance.myId].weaponManager.maxAmmo.ToString());
+    }
+
+    public void UpdateHealthEffect()
+    {
+        Vignette vignette;
+        volume.profile.TryGet(out vignette);
+
+        DOTween.To(() => vignette.intensity.value, x => vignette.intensity.value = x, 1 - GameManager.players[Client.instance.myId].health / 100, 0.5f);
     }
 }

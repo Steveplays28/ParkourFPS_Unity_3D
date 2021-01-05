@@ -33,6 +33,7 @@ public class PlayerManager : MonoBehaviour
         if (id == Client.instance.myId)
         {
             UIManager.instance.healthBar.value = health;
+            UIManager.instance.UpdateHealthEffect();
         }
 
         if (health <= 0f)

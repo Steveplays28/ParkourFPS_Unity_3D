@@ -1596,7 +1596,7 @@ GameObject:
   m_Component:
   - component: {fileID: 498544652}
   - component: {fileID: 498544651}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Global Volume
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2502,6 +2502,7 @@ MonoBehaviour:
   healthBar: {fileID: 990234564}
   weaponName: {fileID: 412628286}
   ammoCounter: {fileID: 1045043728}
+  volume: {fileID: 498544651}
 --- !u!114 &1034939996
 MonoBehaviour:
   m_ObjectHideFlags: 0
