@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour
             ClientSend.PlayerRun();
         }
 
-        if (playerManager.currentHealth <= 0 || isPaused)
+        if (isPaused)
         {
             return;
         }
@@ -42,21 +42,7 @@ public class PlayerController : MonoBehaviour
         //Shooting weapons
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            if (playerManager.weaponManager.currentAmmo == 0)
-            {
-                ClientSend.PlayerReloadWeapon();
-                playerManager.weaponManager.Reload();
-            }
-            else
-            {
-                ClientSend.PlayerShoot();
-                playerManager.weaponManager.Shoot();
-            }
-        }
-        if (Input.GetKeyUp(KeyCode.Mouse0))
-        {
-            ClientSend.PlayerStopShooting();
-            playerManager.weaponManager.Shoot();
+            ClientSend.PlayerShoot();
         }
 
         //Throwing projectiles
@@ -85,24 +71,20 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             ClientSend.PlayerEquipWeapon(0);
-            playerManager.EquipWeapon(0);
         }
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             ClientSend.PlayerEquipWeapon(1);
-            playerManager.EquipWeapon(1);
         }
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             ClientSend.PlayerEquipWeapon(2);
-            playerManager.EquipWeapon(2);
         }
 
         //Reloading weapons
         if (Input.GetKeyDown(KeyCode.R))
         {
             ClientSend.PlayerReloadWeapon();
-            playerManager.weaponManager.Reload();
         }
 
         ////Wallrunning
@@ -164,7 +146,7 @@ public class PlayerController : MonoBehaviour
         };
 
 
-        if (playerManager.currentHealth <= 0 || isPaused)
+        if (isPaused)
         {
             _inputs = new bool[4];
         }

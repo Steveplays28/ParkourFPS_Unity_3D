@@ -175,6 +175,6 @@ public class ClientHandle : MonoBehaviour
     {
         int _id = _packet.ReadInt();
 
-        GameManager.players[_id].weaponManager.Reload();
+        GameManager.players[_id].weaponManager.StartCoroutine(GameManager.players[_id].weaponManager.Reload());
     }
 }

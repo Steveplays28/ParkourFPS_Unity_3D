@@ -248,19 +248,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   camera: {fileID: 7602026408352127826}
+  nameTag: {fileID: 6860578802379112705}
+  model: {fileID: 829117775900897876}
+  glassesModel: {fileID: 5273686064051377449}
   weaponManager: {fileID: 7634467756160260688}
   weaponManagers:
   - {fileID: 7634467756160260688}
   - {fileID: 7246982299277029103}
   - {fileID: 1685431858408795037}
-  playerNameTag: {fileID: 6860578802379112705}
-  playerModel: {fileID: 829117775900897876}
-  glassesModel: {fileID: 5273686064051377449}
   id: 0
-  username: 
-  health: 0
+  currentHealth: 100
   maxHealth: 100
   itemCount: 0
+  username: 
 --- !u!1 &8148521017928355114
 GameObject:
   m_ObjectHideFlags: 0
@@ -363,6 +363,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2119348556058176898}
     m_Modifications:
+    - target: {fileID: -1083936300610870144, guid: 48e56f0daf169f349bb9415379a9f734,
+        type: 3}
+      propertyPath: entity
+      value: 
+      objectReference: {fileID: 8283048436765457631}
     - target: {fileID: -1083936300610870144, guid: 48e56f0daf169f349bb9415379a9f734,
         type: 3}
       propertyPath: playerManager
@@ -527,6 +532,11 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 8dbea2dc1ab9a07478a9f856e847ae6a, type: 2}
     - target: {fileID: 5938123721662593062, guid: e48d0fbe9627efe40be88ca2908cdf3d,
         type: 3}
+      propertyPath: entity
+      value: 
+      objectReference: {fileID: 8283048436765457631}
+    - target: {fileID: 5938123721662593062, guid: e48d0fbe9627efe40be88ca2908cdf3d,
+        type: 3}
       propertyPath: playerManager
       value: 
       objectReference: {fileID: 8283048436765457631}
@@ -622,6 +632,11 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 8dbea2dc1ab9a07478a9f856e847ae6a, type: 2}
+    - target: {fileID: 5938123721662593062, guid: d725b309f95a52142998fa13a0a9bb1f,
+        type: 3}
+      propertyPath: entity
+      value: 
+      objectReference: {fileID: 8283048436765457631}
     - target: {fileID: 5938123721662593062, guid: d725b309f95a52142998fa13a0a9bb1f,
         type: 3}
       propertyPath: playerManager

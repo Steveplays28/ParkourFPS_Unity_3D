@@ -360,19 +360,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   camera: {fileID: 7455574231334980082}
+  nameTag: {fileID: 2245506520904181214}
+  model: {fileID: 829117775900897876}
+  glassesModel: {fileID: 1253087160463897383}
   weaponManager: {fileID: 4690266672840393472}
   weaponManagers:
   - {fileID: 4690266672840393472}
   - {fileID: 583209952428569818}
   - {fileID: 3772742346213610651}
-  playerNameTag: {fileID: 2245506520904181214}
-  playerModel: {fileID: 829117775900897876}
-  glassesModel: {fileID: 1253087160463897383}
   id: 0
-  username: 
-  currentHealth: 0
+  currentHealth: 100
   maxHealth: 100
   itemCount: 0
+  username: 
 --- !u!114 &6761221046541469059
 MonoBehaviour:
   m_ObjectHideFlags: 0

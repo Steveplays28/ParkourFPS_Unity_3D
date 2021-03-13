@@ -27,75 +27,47 @@ public class WeaponManager : MonoBehaviour
     public bool isAutomatic;
 
     [Header("Animations")]
+    public Animator animator;
+
     public AnimationClip idleAnim;
     public AnimationClip shootAnim;
     public AnimationClip reloadAnim;
 
-    private void Start()
-    {
-        //Instantiate(barrel, );
-    }
-
     public void Shoot()
     {
-        if (entity.currentHealth <= 0f || currentAmmo <= 0)
-        {
-            return;
-        }
-
-        if (shooting == false)
-        {
-            shooting = true;
-        }
-
-        if (Physics.Raycast(entity.transform.position, entity.transform.forward, out RaycastHit hit, range))
-        {
-            if (hit.collider.gameObject.GetComponent<PlayerManager>() != null)
-            {
-                hit.collider.gameObject.GetComponent<PlayerManager>().SetHealth(entity.currentHealth - damage);
-            }
-        }
         currentAmmo -= ammoPerShot;
-
-        if (isAutomatic && shooting)
+        if (entity.id == Client.instance.myId)
         {
-            StartCoroutine(ShootAgainAfterDelay());
+            UIManager.instance.UpdateAmmo();
         }
-    }
-
-    public IEnumerator ShootAgainAfterDelay()
-    {
-        yield return new WaitForSeconds(timeBetweenShots);
-        if (shooting)
-        {
-            Shoot();
-        }
-    }
-
-    public void StopShooting()
-    {
-        shooting = false;
+        animator.Play("Shoot", -1, 0f);
     }
 
     public IEnumerator Reload()
     {
-        if (entity.currentHealth <= 0f || currentAmmo == maxAmmo)
-        {
-            yield break;
-        }
-
+        animator.Play("Reload", -1, 0f);
         yield return new WaitForSeconds(reloadTime);
+
         currentAmmo = maxAmmo;
-        Debug.Log("haha reload go brrrrr");
+        if (entity.id == Client.instance.myId)
+        {
+            UIManager.instance.UpdateAmmo();
+        }
     }
 
     public void StopReload()
     {
         StopCoroutine(Reload());
+        animator.enabled = false;
+        animator.enabled = true;
     }
 
     public void ResetWeapon()
     {
         currentAmmo = maxAmmo;
+        if (entity.id == Client.instance.myId)
+        {
+            UIManager.instance.UpdateAmmo();
+        }
     }
 }

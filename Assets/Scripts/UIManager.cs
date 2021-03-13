@@ -137,6 +137,8 @@ public class UIManager : MonoBehaviour
         inGameUI.SetActive(true);
         healthBar.maxValue = GameManager.players[Client.instance.myId].maxHealth;
         healthBar.value = GameManager.players[Client.instance.myId].currentHealth;
+        UpdateAmmo();
+        UpdateWeapon();        
 
         //Hide cursor
         Cursor.visible = false;

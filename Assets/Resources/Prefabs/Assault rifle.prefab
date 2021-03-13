@@ -114,17 +114,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abb0f89a1256e4c4aa3f6e6641c48d6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerManager: {fileID: 0}
-  animator: {fileID: 4653500518725842066}
+  entity: {fileID: 0}
+  model: {fileID: 0}
+  barrel: {fileID: 0}
+  grip: {fileID: 0}
+  optic: {fileID: 0}
+  bulletOrigin: {fileID: 0}
   weaponName: AssaultRifle1
   damage: 30
   range: 50000
-  usesAmmo: 1
-  currentAmmo: 0
+  currentAmmo: 30
   maxAmmo: 30
   ammoPerShot: 1
   reloadTime: 2
   isReloading: 0
-  isAutomatic: 1
   timeBetweenShots: 0.2
-  isShooting: 0
+  shooting: 0
+  isAutomatic: 1
+  animator: {fileID: 4653500518725842066}
+  idleAnim: {fileID: 0}
+  shootAnim: {fileID: 0}
+  reloadAnim: {fileID: 0}

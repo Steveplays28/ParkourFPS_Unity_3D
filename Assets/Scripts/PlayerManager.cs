@@ -1,22 +1,9 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
-public class PlayerManager : MonoBehaviour
+public class PlayerManager : EntityManager
 {
-    [Header("References")]
-    public new Camera camera;
-    public WeaponManager weaponManager;
-    public WeaponManager[] weaponManagers;
-    public Text playerNameTag;
-    public MeshRenderer playerModel;
-    public MeshRenderer glassesModel;
-
     [Header("Player stats")]
-    public int id;
     public string username;
-    public float currentHealth;
-    public float maxHealth = 100f;
-    public int itemCount = 0;
 
     public void Initialize(int _id, string _username)
     {
@@ -24,7 +11,7 @@ public class PlayerManager : MonoBehaviour
         username = _username;
         currentHealth = maxHealth;
 
-        playerNameTag.text = username;
+        nameTag.text = username;
     }
 
     public void SetHealth(float _health)
@@ -47,10 +34,10 @@ public class PlayerManager : MonoBehaviour
         weaponManager.ResetWeapon();
 
         // Disable meshes
-        playerModel.enabled = false;
+        model.enabled = false;
         glassesModel.enabled = false;
         weaponManager.GetComponent<MeshRenderer>().enabled = false;
-        playerNameTag.transform.parent.gameObject.SetActive(false);
+        nameTag.transform.parent.gameObject.SetActive(false);
     }
 
     public void Respawn()
@@ -58,7 +45,7 @@ public class PlayerManager : MonoBehaviour
         SetHealth(maxHealth);
 
         // Reset weapons
-        foreach(WeaponManager _weaponManager in weaponManagers)
+        foreach(WeaponManager weaponManager in weaponManagers)
         {
             weaponManager.ResetWeapon();
         }
@@ -68,10 +55,10 @@ public class PlayerManager : MonoBehaviour
         }
 
         // Enable meshes
-        playerModel.enabled = true;
+        model.enabled = true;
         glassesModel.enabled = true;
         weaponManager.GetComponent<MeshRenderer>().enabled = true;
-        playerNameTag.transform.parent.gameObject.SetActive(true);
+        nameTag.transform.parent.gameObject.SetActive(true);
     }
 
     public void EquipWeapon(int _weaponId)
