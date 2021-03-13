@@ -4,177 +4,98 @@ using UnityEngine;
 public class WeaponManager : MonoBehaviour
 {
     [Header("References")]
-    public PlayerManager playerManager;
-    public Animator animator;
+    public PlayerManager entity;
+
+    public Mesh model;
+    public Mesh barrel;
+    public Mesh grip;
+    public Mesh optic;
+
+    public Transform bulletOrigin;
 
     [Header("Weapon stats")]
     public string weaponName;
-    public float damage;
+    public int damage;
     public float range;
-
-    [Header("Reloadable weapons only")]
-    public bool usesAmmo = true;
     public int currentAmmo;
     public int maxAmmo;
     public int ammoPerShot;
     public float reloadTime;
     public bool isReloading;
-
-    [Header("Automatic weapons only")]
-    public bool isAutomatic;
     public float timeBetweenShots;
-    public bool isShooting;
-    public bool isWaiting;
+    public bool shooting;
+    public bool isAutomatic;
+
+    [Header("Animations")]
+    public AnimationClip idleAnim;
+    public AnimationClip shootAnim;
+    public AnimationClip reloadAnim;
 
     private void Start()
     {
-        currentAmmo = maxAmmo;
-
-        if (playerManager.id == Client.instance.myId)
-        {
-            UIManager.instance.UpdateWeapon();
-            UIManager.instance.UpdateAmmo();
-        }
+        //Instantiate(barrel, );
     }
 
     public void Shoot()
     {
-        if (playerManager.health <= 0f)
+        if (entity.currentHealth <= 0f || currentAmmo <= 0)
         {
             return;
         }
-        else
+
+        if (shooting == false)
         {
-            if (isAutomatic && isShooting)
+            shooting = true;
+        }
+
+        if (Physics.Raycast(entity.transform.position, entity.transform.forward, out RaycastHit hit, range))
+        {
+            if (hit.collider.gameObject.GetComponent<PlayerManager>() != null)
             {
-                isShooting = false;
-                return;
+                hit.collider.gameObject.GetComponent<PlayerManager>().SetHealth(entity.currentHealth - damage);
             }
         }
+        currentAmmo -= ammoPerShot;
 
-        if (isReloading)
+        if (isAutomatic && shooting)
         {
-            return;
-        }
-        else if (currentAmmo <= 0 && usesAmmo)
-        {
-            Reload();
-            return;
-        }
-
-        if (isAutomatic)
-        {
-            if (isShooting)
-            {
-                isShooting = false;
-                return;
-            }
-            else
-            {
-                isShooting = true;
-                ShootAutomatic();
-                return;
-            }
-        }
-
-        if (usesAmmo)
-        {
-            currentAmmo -= ammoPerShot;
-        }
-
-        animator.Play("Shoot", -1, 0f);
-
-        if (playerManager.id == Client.instance.myId)
-        {
-            UIManager.instance.UpdateAmmo();
-        }
-
-        if (isAutomatic)
-        {
-            StartCoroutine(ShootAfterDelay());
+            StartCoroutine(ShootAgainAfterDelay());
         }
     }
 
-    public void ShootAutomatic()
+    public IEnumerator ShootAgainAfterDelay()
     {
-        if (playerManager.health <= 0f || isReloading || isShooting == false || isWaiting)
-        {
-            return;
-        }
-        else if (currentAmmo <= 0 && usesAmmo)
-        {
-            Reload();
-            return;
-        }
-
-        if (usesAmmo)
-        {
-            currentAmmo -= ammoPerShot;
-        }
-
-        animator.Play("Shoot", -1, 0f);
-
-        if (playerManager.id == Client.instance.myId)
-        {
-            UIManager.instance.UpdateAmmo();
-        }
-
-        StartCoroutine(ShootAfterDelay());
-    }
-
-    private IEnumerator ShootAfterDelay()
-    {
-        isWaiting = true;
         yield return new WaitForSeconds(timeBetweenShots);
-        isWaiting = false;
-        ShootAutomatic();
-
-        yield break;
+        if (shooting)
+        {
+            Shoot();
+        }
     }
 
-    public void Reload()
+    public void StopShooting()
     {
-        if (currentAmmo == maxAmmo || playerManager.health <= 0f || isReloading || usesAmmo == false)
+        shooting = false;
+    }
+
+    public IEnumerator Reload()
+    {
+        if (entity.currentHealth <= 0f || currentAmmo == maxAmmo)
         {
-            return;
+            yield break;
         }
 
-        isReloading = true;
-        animator.Play("Reload");
-        StartCoroutine(ReloadAfterDelay());
-    }
-
-    private IEnumerator ReloadAfterDelay()
-    {
         yield return new WaitForSeconds(reloadTime);
         currentAmmo = maxAmmo;
-        isReloading = false;
-
-        if (playerManager.id == Client.instance.myId)
-        {
-            UIManager.instance.UpdateAmmo();
-        }
-
-        if (isAutomatic)
-        {
-            ShootAutomatic();
-        }
-
-        yield break;
+        Debug.Log("haha reload go brrrrr");
     }
 
-    public void CancelReload()
+    public void StopReload()
     {
-        if (isReloading)
-        {
-            isReloading = false;
-            StopCoroutine(ReloadAfterDelay());
-        }
+        StopCoroutine(Reload());
     }
 
     public void ResetWeapon()
     {
-        CancelReload();
         currentAmmo = maxAmmo;
     }
 }

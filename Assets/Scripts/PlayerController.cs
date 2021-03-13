@@ -1,12 +1,29 @@
 ﻿using UnityEngine;
+using DG.Tweening;
 
 public class PlayerController : MonoBehaviour
 {
     public PlayerManager playerManager;
     public new Camera camera;
+    public bool isPaused;
+
+    private Vector3 wallRunDirection;
+    private bool isWallrunning;
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (isPaused)
+            {
+                UIManager.instance.ClosePauseMenu();
+            }
+            else
+            {
+                UIManager.instance.OpenPauseMenu();
+            }
+        }
+
         //Running
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
@@ -17,66 +34,117 @@ public class PlayerController : MonoBehaviour
             ClientSend.PlayerRun();
         }
 
-        if (playerManager.health > 0)
+        if (playerManager.currentHealth <= 0 || isPaused)
         {
-            //Shooting weapons
-            if (Input.GetKeyDown(KeyCode.Mouse0))
-            {
-                ClientSend.PlayerShoot();
-                playerManager.weaponManager.Shoot();
-            }
-            if (Input.GetKeyUp(KeyCode.Mouse0) && playerManager.weaponManager.isAutomatic)
-            {
-                ClientSend.PlayerShoot();
-                playerManager.weaponManager.Shoot();
-            }
+            return;
+        }
 
-            //Throwing projectiles
-            if (Input.GetKeyDown(KeyCode.Mouse1))
-            {
-                ClientSend.PlayerThrowItem(camera.transform.forward);
-            }
-
-            //Jumping
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                ClientSend.PlayerJump();
-            }
-
-            //Crouching
-            if (Input.GetKeyDown(KeyCode.LeftControl))
-            {
-                ClientSend.PlayerCrouch();
-            }
-            if (Input.GetKeyUp(KeyCode.LeftControl))
-            {
-                ClientSend.PlayerCrouch();
-            }
-
-            //Equipping weapons
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                ClientSend.PlayerEquipWeapon(0);
-                playerManager.EquipWeapon(0);
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                ClientSend.PlayerEquipWeapon(1);
-                playerManager.EquipWeapon(1);
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha3))
-            {
-                ClientSend.PlayerEquipWeapon(2);
-                playerManager.EquipWeapon(2);
-            }
-
-            //Reloading weapons
-            if (Input.GetKeyDown(KeyCode.R))
+        //Shooting weapons
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            if (playerManager.weaponManager.currentAmmo == 0)
             {
                 ClientSend.PlayerReloadWeapon();
                 playerManager.weaponManager.Reload();
             }
+            else
+            {
+                ClientSend.PlayerShoot();
+                playerManager.weaponManager.Shoot();
+            }
         }
+        if (Input.GetKeyUp(KeyCode.Mouse0))
+        {
+            ClientSend.PlayerStopShooting();
+            playerManager.weaponManager.Shoot();
+        }
+
+        //Throwing projectiles
+        if (Input.GetKeyDown(KeyCode.Mouse1))
+        {
+            ClientSend.PlayerThrowItem(camera.transform.forward);
+        }
+
+        //Jumping
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            ClientSend.PlayerJump();
+        }
+
+        //Crouching
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            ClientSend.PlayerCrouch();
+        }
+        if (Input.GetKeyUp(KeyCode.LeftControl))
+        {
+            ClientSend.PlayerCrouch();
+        }
+
+        //Equipping weapons
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            ClientSend.PlayerEquipWeapon(0);
+            playerManager.EquipWeapon(0);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            ClientSend.PlayerEquipWeapon(1);
+            playerManager.EquipWeapon(1);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            ClientSend.PlayerEquipWeapon(2);
+            playerManager.EquipWeapon(2);
+        }
+
+        //Reloading weapons
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ClientSend.PlayerReloadWeapon();
+            playerManager.weaponManager.Reload();
+        }
+
+        ////Wallrunning
+        //if (Physics.Raycast(transform.position, transform.right, out RaycastHit hitR, 1))
+        //{
+        //    wallRunDirection = Quaternion.AngleAxis(90, Vector3.up) * hitR.normal;
+
+        //    Debug.Log(wallRunDirection);
+        //    Debug.DrawLine(transform.position, transform.position + wallRunDirection + transform.right, Color.white, 1);
+
+        //    transform.DOLookAt(transform.position + wallRunDirection + transform.right, 0.5f);
+        //    //transform.forward = transform.position + wallRunDirection + transform.right;
+        //    //transform.rotation = Quaternion.LookRotation(transform.position + wallRunDirection + transform.right, Vector3.up);
+
+        //    if (!isWallrunning)
+        //    {
+        //        isWallrunning = true;
+        //    }
+        //}
+        //else if (Physics.Raycast(transform.position, -transform.right, out RaycastHit hitL, 1))
+        //{
+        //    wallRunDirection = Quaternion.AngleAxis(-90, Vector3.up) * hitL.normal;
+
+        //    Debug.DrawLine(transform.position, transform.position + wallRunDirection + -transform.right, Color.white, 1);
+        //    Debug.Log(wallRunDirection);
+
+        //    transform.DOLookAt(transform.position + wallRunDirection + -transform.right, 0.5f);
+        //    //transform.forward = transform.position + wallRunDirection + -transform.right;
+        //    //transform.rotation = Quaternion.LookRotation(transform.position + wallRunDirection + -transform.right, Vector3.up);
+
+        //    if (!isWallrunning)
+        //    {
+        //        isWallrunning = true;
+        //    }
+        //}
+        //else
+        //{
+        //    if (isWallrunning)
+        //    {
+        //        isWallrunning = false;
+        //    }
+        //}
     }
 
     private void FixedUpdate()
@@ -94,6 +162,12 @@ public class PlayerController : MonoBehaviour
             Input.GetKey(KeyCode.A),
             Input.GetKey(KeyCode.D),
         };
+
+
+        if (playerManager.currentHealth <= 0 || isPaused)
+        {
+            _inputs = new bool[4];
+        }
 
         ClientSend.PlayerMovement(_inputs, transform.rotation, camera.transform.rotation);
     }

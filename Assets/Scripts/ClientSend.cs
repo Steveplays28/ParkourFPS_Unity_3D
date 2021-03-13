@@ -34,7 +34,9 @@ public class ClientSend : MonoBehaviour
     }
 
     /// <summary>Sends player input to the server.</summary>
-    /// <param name="_inputs"></param>
+    /// <param name="_inputs">The currently pressed inputs.</param>
+    /// <param name="_playerRotation">The current player rotation.</param>
+    /// <param name="_cameraRotation">The current camera rotation.</param>
     public static void PlayerMovement(bool[] _inputs, Quaternion _playerRotation, Quaternion _cameraRotation)
     {
         using (Packet _packet = new Packet((int)ClientPackets.playerMovement))
@@ -56,6 +58,14 @@ public class ClientSend : MonoBehaviour
         using (Packet _packet = new Packet((int)ClientPackets.playerShoot))
         {
             SendTCPData(_packet);
+        }
+    }
+
+    public static void PlayerStopShooting()
+    {
+        using (Packet packet = new Packet((int)ClientPackets.playerStopShooting))
+        {
+            SendTCPData(packet);
         }
     }
 
@@ -93,13 +103,13 @@ public class ClientSend : MonoBehaviour
         }
     }
 
-    public static void PlayerEquipWeapon(int _weaponId)
+    public static void PlayerEquipWeapon(int weaponId)
     {
-        using (Packet _packet = new Packet((int)ClientPackets.playerEquipWeapon))
+        using (Packet packet = new Packet((int)ClientPackets.playerEquipWeapon))
         {
-            _packet.Write(_weaponId);
+            packet.Write(weaponId);
 
-            SendTCPData(_packet);
+            SendTCPData(packet);
         }
     }
 

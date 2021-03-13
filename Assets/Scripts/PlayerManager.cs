@@ -14,7 +14,7 @@ public class PlayerManager : MonoBehaviour
     [Header("Player stats")]
     public int id;
     public string username;
-    public float health;
+    public float currentHealth;
     public float maxHealth = 100f;
     public int itemCount = 0;
 
@@ -22,21 +22,21 @@ public class PlayerManager : MonoBehaviour
     {
         id = _id;
         username = _username;
-        health = maxHealth;
+        currentHealth = maxHealth;
 
         playerNameTag.text = username;
     }
 
     public void SetHealth(float _health)
     {
-        health = _health;
+        currentHealth = _health;
         if (id == Client.instance.myId)
         {
-            UIManager.instance.healthBar.value = health;
+            UIManager.instance.healthBar.value = currentHealth;
             UIManager.instance.UpdateHealthEffect();
         }
 
-        if (health <= 0f)
+        if (currentHealth <= 0f)
         {
             Die();
         }
@@ -60,10 +60,7 @@ public class PlayerManager : MonoBehaviour
         // Reset weapons
         foreach(WeaponManager _weaponManager in weaponManagers)
         {
-            if (_weaponManager.usesAmmo)
-            {
-                _weaponManager.currentAmmo = _weaponManager.maxAmmo;
-            }
+            weaponManager.ResetWeapon();
         }
         if (id == Client.instance.myId)
         {
@@ -81,7 +78,7 @@ public class PlayerManager : MonoBehaviour
     {
         if (weaponManager.isReloading)
         {
-            weaponManager.CancelReload();
+            weaponManager.StopReload();
         }
 
         WeaponManager[] _weapons = GetComponentsInChildren<WeaponManager>(true);
