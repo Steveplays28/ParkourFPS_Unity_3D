@@ -3,19 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class SettingsManager : MonoBehaviour
 {
     public static SettingsManager instance;
 
-    public TMP_Text fullscreenModeDropdown;
+    public TMP_Text fullscreenModeText;
     public TMP_Text resolutionText;
-    public Dropdown qualityPresetDropdown;
+    public TMP_Text qualityPresetText;
 
     [Header("Fullscreen modes")]
     public int currentFullScreenModeId;
     public Dictionary<int, FullScreenMode> supportedFullscreenModes = new Dictionary<int, FullScreenMode>();
+    private Dictionary<FullScreenMode, string> fullscreenModeNames = new Dictionary<FullScreenMode, string>()
+    {
+        { FullScreenMode.ExclusiveFullScreen, "Exclusive fullscreen" },
+        { FullScreenMode.FullScreenWindow, "Windowed fullscreen" },
+        { FullScreenMode.MaximizedWindow, "Maximized window" },
+        { FullScreenMode.Windowed, "Windowed" }
+    };
 
     [Header("Resolutions")]
     public int currentResolutionId;
@@ -23,6 +29,7 @@ public class SettingsManager : MonoBehaviour
 
     [Header("Quality presets")]
     public int currentQualityPresetId;
+    public Dictionary<int, string> supportedQualityPresets = new Dictionary<int, string>();
 
     private void Awake()
     {
@@ -47,27 +54,37 @@ public class SettingsManager : MonoBehaviour
     #region Fullscreen mode
     private void GetSupportedFullscreenModes()
     {
-        foreach (FullScreenMode fullScreenMode in Enum.GetValues(typeof(FullScreenMode)))
+        int index = 0;
+
+        for (int i = Enum.GetValues(typeof(FullScreenMode)).Length - 1; i >= 0; i--)
         {
-            supportedFullscreenModes.Add((int)fullScreenMode, fullScreenMode);
+            supportedFullscreenModes.Add(index, (FullScreenMode)i);
+            index++;
         }
+
+        currentFullScreenModeId = supportedFullscreenModes.FirstOrDefault(x => x.Value.Equals(Screen.fullScreenMode)).Key;
+        string currentFullScreenMode = supportedFullscreenModes[currentFullScreenModeId].ToString();
+        fullscreenModeText.text = char.ToUpper(currentFullScreenMode.First()) + currentFullScreenMode.Substring(1).ToLower();
     }
 
     public void SetFullscreenMode(bool lower)
     {
-        if (lower)
+        if (lower && supportedFullscreenModes.ContainsKey(currentFullScreenModeId - 1))
         {
             Screen.fullScreenMode = supportedFullscreenModes[currentFullScreenModeId - 1];
             currentFullScreenModeId -= 1;
         }
-        else
+        else if (lower == false && supportedFullscreenModes.ContainsKey(currentFullScreenModeId + 1))
         {
             Screen.fullScreenMode = supportedFullscreenModes[currentFullScreenModeId + 1];
             currentFullScreenModeId += 1;
         }
+        else
+        {
+            return;
+        }
 
-        string currentFullScreenMode = supportedFullscreenModes[currentFullScreenModeId].ToString();
-        fullscreenModeDropdown.text = char.ToUpper(currentFullScreenMode.First()) + currentFullScreenMode.Substring(1).ToLower();
+        fullscreenModeText.text = fullscreenModeNames[supportedFullscreenModes[currentFullScreenModeId]];
     }
     #endregion
 
@@ -78,44 +95,63 @@ public class SettingsManager : MonoBehaviour
         {
             supportedResolutions[i] = (Resolution)Screen.resolutions.GetValue(i);
         }
+
+        currentResolutionId = supportedResolutions.FirstOrDefault(x => x.Value.Equals(Screen.currentResolution)).Key;
+        resolutionText.text = string.Concat(supportedResolutions[currentResolutionId].width.ToString(), "x", supportedResolutions[currentResolutionId].height.ToString(), " ", supportedResolutions[currentResolutionId].refreshRate.ToString(), "Hz");
     }
 
     public void SetResolution(bool lower)
     {
-        if (lower)
+        if (lower && supportedResolutions.ContainsKey(currentResolutionId - 1))
         {
             Screen.SetResolution(supportedResolutions[currentResolutionId - 1].width, supportedResolutions[currentResolutionId - 1].height, Screen.fullScreen);
             currentResolutionId -= 1;
 
         }
-        else
+        else if (lower == false && supportedResolutions.ContainsKey(currentResolutionId + 1))
         {
             Screen.SetResolution(supportedResolutions[currentResolutionId + 1].width, supportedResolutions[currentResolutionId + 1].height, Screen.fullScreen);
             currentResolutionId += 1;
         }
+        else
+        {
+            return;
+        }
 
-        resolutionText.text = string.Concat(supportedResolutions[currentResolutionId].width.ToString(), "x", supportedResolutions[currentResolutionId].height.ToString(), " ", supportedResolutions[currentResolutionId].refreshRate.ToString());
+        resolutionText.text = string.Concat(supportedResolutions[currentResolutionId].width.ToString(), "x", supportedResolutions[currentResolutionId].height.ToString(), " ", supportedResolutions[currentResolutionId].refreshRate.ToString(), "Hz");
     }
     #endregion
 
     #region Quality preset
     private void GetSupportedQualityPresets()
     {
+        for (int i = 0; i < QualitySettings.names.Length; i++)
+        {
+            supportedQualityPresets.Add(i, QualitySettings.names[i]);
+        }
+
         currentQualityPresetId = QualitySettings.GetQualityLevel();
+        qualityPresetText.text = supportedQualityPresets[currentQualityPresetId];
     }
 
     public void SetQualityPreset(bool lower)
     {
-        if (lower)
+        if (lower && supportedQualityPresets.ContainsKey(currentQualityPresetId - 1))
         {
             QualitySettings.DecreaseLevel();
             currentQualityPresetId -= 1;
         }
-        else
+        else if (lower == false && supportedQualityPresets.ContainsKey(currentQualityPresetId + 1))
         {
             QualitySettings.IncreaseLevel();
             currentQualityPresetId += 1;
         }
+        else
+        {
+            return;
+        }
+
+        qualityPresetText.text = supportedQualityPresets[currentQualityPresetId];
     }
     #endregion
 }
