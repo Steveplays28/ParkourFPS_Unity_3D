@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using DG.Tweening;
 
 public class PlayerController : MonoBehaviour
 {
@@ -7,18 +6,19 @@ public class PlayerController : MonoBehaviour
     public new Camera camera;
     public bool isPaused;
 
-    private Vector3 wallRunDirection;
-    private bool isWallrunning;
-
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (isPaused)
+            if (UIManager.instance.currentOpenMenu == UIManager.instance.pauseMenu)
             {
                 UIManager.instance.ClosePauseMenu();
             }
-            else
+            else if (UIManager.instance.currentOpenMenu == UIManager.instance.optionsMenu)
+            {
+                UIManager.instance.CloseOptionsMenu();
+            }
+            else if (UIManager.instance.currentOpenMenu == null)
             {
                 UIManager.instance.OpenPauseMenu();
             }
@@ -43,6 +43,10 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             ClientSend.PlayerShoot();
+        }
+        if (Input.GetKeyUp(KeyCode.Mouse0))
+        {
+            ClientSend.PlayerStopShooting();
         }
 
         //Throwing projectiles
@@ -80,53 +84,32 @@ public class PlayerController : MonoBehaviour
         {
             ClientSend.PlayerEquipWeapon(2);
         }
+        if (Input.GetAxis("Mouse ScrollWheel") > 0f) // Forward scroll
+        {
+            int newWeaponIndex = playerManager.currentWeaponId + 1;
+            if (newWeaponIndex > playerManager.weaponManagers.Length - 1)
+            {
+                newWeaponIndex = 0;
+            }
+
+            ClientSend.PlayerEquipWeapon(newWeaponIndex);
+        }
+        if (Input.GetAxis("Mouse ScrollWheel") < 0f) // Backwards scroll
+        {
+            int newWeaponIndex = playerManager.currentWeaponId - 1;
+            if (newWeaponIndex < 0)
+            {
+                newWeaponIndex = playerManager.weaponManagers.Length - 1;
+            }
+
+            ClientSend.PlayerEquipWeapon(newWeaponIndex);
+        }
 
         //Reloading weapons
         if (Input.GetKeyDown(KeyCode.R))
         {
             ClientSend.PlayerReloadWeapon();
         }
-
-        ////Wallrunning
-        //if (Physics.Raycast(transform.position, transform.right, out RaycastHit hitR, 1))
-        //{
-        //    wallRunDirection = Quaternion.AngleAxis(90, Vector3.up) * hitR.normal;
-
-        //    Debug.Log(wallRunDirection);
-        //    Debug.DrawLine(transform.position, transform.position + wallRunDirection + transform.right, Color.white, 1);
-
-        //    transform.DOLookAt(transform.position + wallRunDirection + transform.right, 0.5f);
-        //    //transform.forward = transform.position + wallRunDirection + transform.right;
-        //    //transform.rotation = Quaternion.LookRotation(transform.position + wallRunDirection + transform.right, Vector3.up);
-
-        //    if (!isWallrunning)
-        //    {
-        //        isWallrunning = true;
-        //    }
-        //}
-        //else if (Physics.Raycast(transform.position, -transform.right, out RaycastHit hitL, 1))
-        //{
-        //    wallRunDirection = Quaternion.AngleAxis(-90, Vector3.up) * hitL.normal;
-
-        //    Debug.DrawLine(transform.position, transform.position + wallRunDirection + -transform.right, Color.white, 1);
-        //    Debug.Log(wallRunDirection);
-
-        //    transform.DOLookAt(transform.position + wallRunDirection + -transform.right, 0.5f);
-        //    //transform.forward = transform.position + wallRunDirection + -transform.right;
-        //    //transform.rotation = Quaternion.LookRotation(transform.position + wallRunDirection + -transform.right, Vector3.up);
-
-        //    if (!isWallrunning)
-        //    {
-        //        isWallrunning = true;
-        //    }
-        //}
-        //else
-        //{
-        //    if (isWallrunning)
-        //    {
-        //        isWallrunning = false;
-        //    }
-        //}
     }
 
     private void FixedUpdate()

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
+using DG.Tweening;
 
 public class ClientHandle : MonoBehaviour
 {
@@ -18,6 +19,11 @@ public class ClientHandle : MonoBehaviour
         Client.instance.udp.Connect(((IPEndPoint)Client.instance.tcp.socket.Client.LocalEndPoint).Port);
     }
 
+    public static void Ping(Packet _packet)
+    {
+        UIManager.instance.UpdatePingCounter();
+    }
+
     public static void SpawnPlayer(Packet _packet)
     {
         int _id = _packet.ReadInt();
@@ -28,14 +34,15 @@ public class ClientHandle : MonoBehaviour
         GameManager.instance.SpawnPlayer(_id, _username, _position, _rotation);
     }
 
-    public static void PlayerPosition(Packet _packet)
+    public static void PlayerPosition(Packet packet)
     {
-        int _id = _packet.ReadInt();
-        Vector3 _position = _packet.ReadVector3();
+        int id = packet.ReadInt();
+        Vector3 position = packet.ReadVector3();
 
-        if (GameManager.players.TryGetValue(_id, out PlayerManager _player))
+        if (GameManager.players.TryGetValue(id, out PlayerManager player))
         {
-            _player.transform.position = _position;
+            player.transform.DOMove(position, player.LerpTime);
+            //_player.transform.position = _position;
         }
     }
 

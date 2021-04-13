@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,10 +9,20 @@ public class SettingsManager : MonoBehaviour
 {
     public static SettingsManager instance;
 
-    public Dropdown fullscreenModeDropdown;
-    public Dropdown resolutionDropdown;
+    public TMP_Text fullscreenModeDropdown;
+    public TMP_Text resolutionText;
     public Dropdown qualityPresetDropdown;
-    public bool fullscreen;
+
+    [Header("Fullscreen modes")]
+    public int currentFullScreenModeId;
+    public Dictionary<int, FullScreenMode> supportedFullscreenModes = new Dictionary<int, FullScreenMode>();
+
+    [Header("Resolutions")]
+    public int currentResolutionId;
+    public Dictionary<int, Resolution> supportedResolutions = new Dictionary<int, Resolution>();
+
+    [Header("Quality presets")]
+    public int currentQualityPresetId;
 
     private void Awake()
     {
@@ -27,48 +40,82 @@ public class SettingsManager : MonoBehaviour
     private void Start()
     {
         GetSupportedResolutions();
-        GetQualityPreset();
+        GetSupportedFullscreenModes();
+        GetSupportedQualityPresets();
     }
 
-    public void GetSupportedResolutions()
+    #region Fullscreen mode
+    private void GetSupportedFullscreenModes()
     {
-        List<string> _resolutions = new List<string>();
-        int _currentResolutionindex = 0;
-
-        for (int i = 0; i < Screen.resolutions.Length; i++)
+        foreach (FullScreenMode fullScreenMode in Enum.GetValues(typeof(FullScreenMode)))
         {
-            Resolution _resolution = (Resolution)Screen.resolutions.GetValue(i);
+            supportedFullscreenModes.Add((int)fullScreenMode, fullScreenMode);
+        }
+    }
 
-            _resolutions.Add(string.Concat(_resolution.width.ToString(), "x", _resolution.height.ToString()));
-
-            if (_resolution.width == Screen.currentResolution.width && _resolution.height == Screen.currentResolution.height)
-            {
-                _currentResolutionindex = i;
-            }
+    public void SetFullscreenMode(bool lower)
+    {
+        if (lower)
+        {
+            Screen.fullScreenMode = supportedFullscreenModes[currentFullScreenModeId - 1];
+            currentFullScreenModeId -= 1;
+        }
+        else
+        {
+            Screen.fullScreenMode = supportedFullscreenModes[currentFullScreenModeId + 1];
+            currentFullScreenModeId += 1;
         }
 
-        resolutionDropdown.AddOptions(_resolutions);
-        resolutionDropdown.value = _currentResolutionindex;
-        resolutionDropdown.RefreshShownValue();
+        string currentFullScreenMode = supportedFullscreenModes[currentFullScreenModeId].ToString();
+        fullscreenModeDropdown.text = char.ToUpper(currentFullScreenMode.First()) + currentFullScreenMode.Substring(1).ToLower();
+    }
+    #endregion
+
+    #region Resolutions
+    private void GetSupportedResolutions()
+    {
+        for (int i = 0; i < Screen.resolutions.Length; i++)
+        {
+            supportedResolutions[i] = (Resolution)Screen.resolutions.GetValue(i);
+        }
     }
 
-    public void SetResolution()
+    public void SetResolution(bool lower)
     {
-        Screen.SetResolution(Screen.resolutions[resolutionDropdown.value].width, Screen.resolutions[resolutionDropdown.value].height, fullscreen);
+        if (lower)
+        {
+            Screen.SetResolution(supportedResolutions[currentResolutionId - 1].width, supportedResolutions[currentResolutionId - 1].height, Screen.fullScreen);
+            currentResolutionId -= 1;
+
+        }
+        else
+        {
+            Screen.SetResolution(supportedResolutions[currentResolutionId + 1].width, supportedResolutions[currentResolutionId + 1].height, Screen.fullScreen);
+            currentResolutionId += 1;
+        }
+
+        resolutionText.text = string.Concat(supportedResolutions[currentResolutionId].width.ToString(), "x", supportedResolutions[currentResolutionId].height.ToString(), " ", supportedResolutions[currentResolutionId].refreshRate.ToString());
+    }
+    #endregion
+
+    #region Quality preset
+    private void GetSupportedQualityPresets()
+    {
+        currentQualityPresetId = QualitySettings.GetQualityLevel();
     }
 
-    public void SetFullscreenMode()
+    public void SetQualityPreset(bool lower)
     {
-        Screen.fullScreenMode = (FullScreenMode)fullscreenModeDropdown.value;
+        if (lower)
+        {
+            QualitySettings.DecreaseLevel();
+            currentQualityPresetId -= 1;
+        }
+        else
+        {
+            QualitySettings.IncreaseLevel();
+            currentQualityPresetId += 1;
+        }
     }
-
-    public void GetQualityPreset()
-    {
-        qualityPresetDropdown.value = QualitySettings.GetQualityLevel();
-    }
-
-    public void SetQualityPreset()
-    {
-        QualitySettings.SetQualityLevel(qualityPresetDropdown.value, true);
-    }
+    #endregion
 }

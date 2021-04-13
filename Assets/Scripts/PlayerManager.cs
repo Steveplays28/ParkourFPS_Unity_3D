@@ -31,12 +31,10 @@ public class PlayerManager : EntityManager
 
     public void Die()
     {
-        weaponManager.ResetWeapon();
-
         // Disable meshes
         model.enabled = false;
         glassesModel.enabled = false;
-        weaponManager.GetComponent<MeshRenderer>().enabled = false;
+        weaponManager.Disable();
         nameTag.transform.parent.gameObject.SetActive(false);
     }
 
@@ -57,26 +55,21 @@ public class PlayerManager : EntityManager
         // Enable meshes
         model.enabled = true;
         glassesModel.enabled = true;
-        weaponManager.GetComponent<MeshRenderer>().enabled = true;
+        weaponManager.Enable();
         nameTag.transform.parent.gameObject.SetActive(true);
     }
 
-    public void EquipWeapon(int _weaponId)
+    public void EquipWeapon(int weaponId)
     {
         if (weaponManager.isReloading)
         {
             weaponManager.StopReload();
         }
+        weaponManager.Disable();
 
-        WeaponManager[] _weapons = GetComponentsInChildren<WeaponManager>(true);
-
-        foreach (WeaponManager _weapon in _weapons)
-        {
-            _weapon.gameObject.SetActive(false);
-        }
-
-        weaponManager = _weapons[_weaponId];
-        _weapons[_weaponId].gameObject.SetActive(true);
+        weaponManager = weaponManagers[weaponId];
+        weaponManager.Enable();
+        currentWeaponId = weaponId;
 
         if (id == Client.instance.myId)
         {

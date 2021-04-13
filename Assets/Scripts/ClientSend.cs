@@ -33,6 +33,14 @@ public class ClientSend : MonoBehaviour
         }
     }
 
+    public static void Ping()
+    {
+        using (Packet _packet = new Packet((int)ClientPackets.ping))
+        {
+            SendUDPData(_packet);
+        }
+    }
+
     /// <summary>Sends player input to the server.</summary>
     /// <param name="_inputs">The currently pressed inputs.</param>
     /// <param name="_playerRotation">The current player rotation.</param>

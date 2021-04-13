@@ -1,9 +1,8 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
-using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Client : MonoBehaviour
@@ -36,7 +35,7 @@ public class Client : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        Disconnect(); // Disconnect when the game is closed
+        Disconnect(true); // Disconnect when the game is closed
     }
 
     /// <summary>Attempts to connect to the server.</summary>
@@ -53,7 +52,6 @@ public class Client : MonoBehaviour
 
         InitializeClientData();
 
-        isConnected = true;
         tcp.Connect(); // Connect tcp, udp gets connected once tcp is done
     }
 
@@ -120,7 +118,8 @@ public class Client : MonoBehaviour
                 int _byteLength = stream.EndRead(_result);
                 if (_byteLength <= 0)
                 {
-                    instance.Disconnect();
+                    Debug.LogError($"Error receiving data from server via TCP: packet byteLength was less than 0");
+                    instance.Disconnect(false);
                     return;
                 }
 
@@ -130,8 +129,9 @@ public class Client : MonoBehaviour
                 receivedData.Reset(HandleData(_data)); // Reset receivedData if all data was handled
                 stream.BeginRead(receiveBuffer, 0, dataBufferSize, ReceiveCallback, null);
             }
-            catch
+            catch (Exception _ex)
             {
+                Debug.LogError($"Error receiving data from server via TCP: {_ex}");
                 Disconnect();
             }
         }
@@ -192,7 +192,7 @@ public class Client : MonoBehaviour
         /// <summary>Disconnects from the server and cleans up the TCP connection.</summary>
         private void Disconnect()
         {
-            instance.Disconnect();
+            instance.Disconnect(false);
 
             stream = null;
             receivedData = null;
@@ -224,6 +224,8 @@ public class Client : MonoBehaviour
             {
                 SendData(_packet);
             }
+
+            instance.isConnected = true;
         }
 
         /// <summary>Sends data to the client via UDP.</summary>
@@ -240,7 +242,7 @@ public class Client : MonoBehaviour
             }
             catch (Exception _ex)
             {
-                Debug.Log($"Error sending data to server via UDP: {_ex}");
+                Debug.LogError($"Error sending data to server via UDP: {_ex}");
             }
         }
 
@@ -254,14 +256,16 @@ public class Client : MonoBehaviour
 
                 if (_data.Length < 4)
                 {
-                    instance.Disconnect();
+                    Debug.LogError($"Error receiving data from server via UDP: packet dataLength was less than 4");
+                    instance.Disconnect(false);
                     return;
                 }
 
                 HandleData(_data);
             }
-            catch
+            catch (Exception _ex)
             {
+                Debug.LogError($"Error receiving data from server via UDP: {_ex}");
                 Disconnect();
             }
         }
@@ -289,7 +293,7 @@ public class Client : MonoBehaviour
         /// <summary>Disconnects from the server and cleans up the UDP connection.</summary>
         private void Disconnect()
         {
-            instance.Disconnect();
+            instance.Disconnect(false);
 
             endPoint = null;
             socket = null;
@@ -302,6 +306,7 @@ public class Client : MonoBehaviour
         packetHandlers = new Dictionary<int, PacketHandler>()
         {
             { (int)ServerPackets.welcome, ClientHandle.Welcome },
+            { (int)ServerPackets.ping, ClientHandle.Ping },
             { (int)ServerPackets.spawnPlayer, ClientHandle.SpawnPlayer },
             { (int)ServerPackets.playerPosition, ClientHandle.PlayerPosition },
             { (int)ServerPackets.playerRotation, ClientHandle.PlayerRotation },
@@ -325,21 +330,41 @@ public class Client : MonoBehaviour
     }
 
     /// <summary>Disconnects from the server and stops all network traffic.</summary>
-    public void Disconnect()
+    public void Disconnect(bool isQuittingGame)
     {
         if (isConnected)
         {
-            isConnected = false;
-            tcp.socket.Close();
-            udp.socket.Close();
+            if (tcp.socket != null)
+            {
+                tcp.socket.Close();
+            }
+            else
+            {
+                Debug.LogError("Failed closing the TCP socket: socket is null");
+            }
 
-            SceneManager.LoadSceneAsync(0, LoadSceneMode.Single);
+            if (udp.socket != null)
+            {
+                udp.socket.Close();
+            }
+            else
+            {
+                Debug.LogError("Failed closing the UDP socket: socket is null");
+            }
+
             GameManager.players = new Dictionary<int, PlayerManager>();
             GameManager.itemSpawners = new Dictionary<int, ItemSpawner>();
             GameManager.projectiles = new Dictionary<int, ProjectileManager>();
             GameManager.enemies = new Dictionary<int, EnemyManager>();
 
+            isConnected = false;
             Debug.Log("Disconnected from server.");
+
+            if (isQuittingGame == false)
+            {
+                SceneManager.LoadSceneAsync(1, LoadSceneMode.Single);
+                UIManager.instance.OnDisconnected();
+            }
         }
     }
 }

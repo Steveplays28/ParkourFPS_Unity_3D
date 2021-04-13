@@ -132,6 +132,3 @@ MonoBehaviour:
   shooting: 0
   isAutomatic: 1
   animator: {fileID: 4653500518725842066}
-  idleAnim: {fileID: 0}
-  shootAnim: {fileID: 0}
-  reloadAnim: {fileID: 0}

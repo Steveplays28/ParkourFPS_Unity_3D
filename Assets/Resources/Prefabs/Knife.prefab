@@ -114,17 +114,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abb0f89a1256e4c4aa3f6e6641c48d6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerManager: {fileID: 0}
-  animator: {fileID: 1422388930919816228}
+  entity: {fileID: 0}
+  model: {fileID: 0}
+  barrel: {fileID: 0}
+  grip: {fileID: 0}
+  optic: {fileID: 0}
+  bulletOrigin: {fileID: 0}
   weaponName: Knife1
   damage: 100
   range: 2.5
-  usesAmmo: 0
   currentAmmo: 0
   maxAmmo: 0
   ammoPerShot: 0
   reloadTime: 0
   isReloading: 0
-  isAutomatic: 1
   timeBetweenShots: 0.75
-  isShooting: 0
+  shooting: 0
+  isAutomatic: 1
+  animator: {fileID: 1422388930919816228}

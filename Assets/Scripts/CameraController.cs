@@ -17,16 +17,10 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            ToggleCursorMode();
-        }
-
-        if (Cursor.lockState == CursorLockMode.Locked)
+        if (Cursor.lockState == CursorLockMode.Locked && !Cursor.visible)
         {
             Look();
         }
-        Debug.DrawRay(transform.position, transform.forward * 2, Color.red);
     }
 
     private void Look()
@@ -43,7 +37,7 @@ public class CameraController : MonoBehaviour
         player.transform.rotation = Quaternion.Euler(0f, horizontalRotation, 0f);
     }
 
-    private void ToggleCursorMode()
+    public void ToggleCursorMode()
     {
         Cursor.visible = !Cursor.visible;
 

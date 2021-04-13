@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -51,10 +50,7 @@ public class GameManager : MonoBehaviour
         players.Add(_id, _player.GetComponent<PlayerManager>());
 
         //On connected to server
-        if (_id == Client.instance.myId)
-        {
-            UIManager.instance.OnConnected();
-        }
+        UIManager.instance.OnConnected(_id);
     }
 
     public void CreateItemSpawner(int _spawnerId, Vector3 _position, bool _hasItem)

@@ -1,47 +1,50 @@
-﻿using UnityEditor;
+﻿#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
+[InitializeOnLoad]
 public static class EditorUtility
 {
-    [MenuItem("Tools/Editor Utility/Reset material of every mesh in current scene", false, 0)]
-    public static void ResetAllMeshMaterialInScene()
+    static EditorUtility()
     {
-        Material _defaultMaterial = null;
-        int _amount = 0;
-
-        foreach (Material _material in Resources.FindObjectsOfTypeAll<Material>())
-        {
-            if (_material.name == "Ground")
-            {
-                _defaultMaterial = _material;
-            }
-        }
-        if (_defaultMaterial == null)
-        {
-            Debug.Log("Could not find the Ground material!");
-            return;
-        }
-
-        foreach (MeshRenderer _meshRenderer in Object.FindObjectsOfType<MeshRenderer>(true))
-        {
-            _meshRenderer.sharedMaterial = _defaultMaterial;
-            _amount++;
-        }
-
-        Debug.Log($"Reset {_amount} mesh's material in current scene!");
+        EditorApplication.playModeStateChanged += LoadDefaultScene;
     }
 
-    [MenuItem("Tools/Editor Utility/Remove all colliders from scene", false, 0)]
-    public static void RemoveAllCollidersFromScene()
+    static void LoadDefaultScene(PlayModeStateChange state)
     {
-        int _amount = 0;
-
-        foreach (Collider _collider in Object.FindObjectsOfType<Collider>(true))
+        if (state == PlayModeStateChange.ExitingEditMode)
         {
-            Object.DestroyImmediate(_collider);
-            _amount++;
+            EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
         }
 
-        Debug.Log($"Destroyed {_amount} colliders!");
+        if (state == PlayModeStateChange.EnteredPlayMode && SceneManager.GetActiveScene().buildIndex != 0)
+        {
+            EditorSceneManager.LoadScene(0, LoadSceneMode.Single);
+        }
+    }
+
+    [MenuItem("Tools/Load Level Editor scene")]
+    static void LoadLevelEditorScene()
+    {
+        SceneManager.LoadScene("Level Editor", LoadSceneMode.Single);
+        UIManager.instance.CloseMenu(UIManager.instance.mainMenu);
+        UIManager.instance.usernameField.interactable = false;
+        UIManager.instance.ipField.interactable = false;
+    }
+
+    [MenuItem("Tools/Toggle fps cap")]
+    static void ToggleFpsCap()
+    {
+        if (Application.targetFrameRate == 60)
+        {
+            Application.targetFrameRate = -1;
+        }
+        else
+        {
+            Application.targetFrameRate = 60;
+        }
     }
 }
+#endif

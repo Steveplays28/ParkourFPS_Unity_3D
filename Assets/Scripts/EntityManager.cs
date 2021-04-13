@@ -12,9 +12,11 @@ public class EntityManager : MonoBehaviour
 
     public WeaponManager weaponManager;
     public WeaponManager[] weaponManagers;
+    public int currentWeaponId;
 
     [Header("Entity stats")]
     public int id;
+    public float LerpTime = 0.20f;
     public float currentHealth;
     public float maxHealth = 100f;
     public int itemCount = 0;

@@ -29,10 +29,6 @@ public class WeaponManager : MonoBehaviour
     [Header("Animations")]
     public Animator animator;
 
-    public AnimationClip idleAnim;
-    public AnimationClip shootAnim;
-    public AnimationClip reloadAnim;
-
     public void Shoot()
     {
         currentAmmo -= ammoPerShot;
@@ -40,12 +36,16 @@ public class WeaponManager : MonoBehaviour
         {
             UIManager.instance.UpdateAmmo();
         }
-        animator.Play("Shoot", -1, 0f);
+        //rb.
+        animator.ResetTrigger("Shoot");
+        animator.SetTrigger("Shoot");
+        Debug.Log("shoot");
     }
 
     public IEnumerator Reload()
     {
-        animator.Play("Reload", -1, 0f);
+        animator.ResetTrigger("Reload");
+        animator.SetTrigger("Reload");
         yield return new WaitForSeconds(reloadTime);
 
         currentAmmo = maxAmmo;
@@ -58,8 +58,6 @@ public class WeaponManager : MonoBehaviour
     public void StopReload()
     {
         StopCoroutine(Reload());
-        animator.enabled = false;
-        animator.enabled = true;
     }
 
     public void ResetWeapon()
@@ -69,5 +67,18 @@ public class WeaponManager : MonoBehaviour
         {
             UIManager.instance.UpdateAmmo();
         }
+    }
+
+    public void Enable()
+    {
+        GetComponent<MeshRenderer>().enabled = true;
+        animator.enabled = true;
+        animator.Play("Idle");
+    }
+
+    public void Disable()
+    {
+        GetComponent<MeshRenderer>().enabled = false;
+        animator.enabled = false;
     }
 }
