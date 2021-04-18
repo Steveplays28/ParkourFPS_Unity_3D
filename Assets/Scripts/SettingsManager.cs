@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SettingsManager : MonoBehaviour
 {
@@ -11,6 +12,11 @@ public class SettingsManager : MonoBehaviour
     public TMP_Text fullscreenModeText;
     public TMP_Text resolutionText;
     public TMP_Text qualityPresetText;
+    public TMP_Text fpsText;
+    public TMP_Text vSyncText;
+
+    public Button VSyncButton;
+    public Button[] fpsButtons;
 
     [Header("Fullscreen modes")]
     public int currentFullScreenModeId;
@@ -31,6 +37,22 @@ public class SettingsManager : MonoBehaviour
     public int currentQualityPresetId;
     public Dictionary<int, string> supportedQualityPresets = new Dictionary<int, string>();
 
+    [Header("FPS Cap")]
+    public int currentFpsCap = 60;
+    public int minFps = 1;
+    public int maxFps = 360;
+
+    [Header("VSync")]
+    public int currentVSyncCount;
+    public Dictionary<int, string> supportedVSyncCounts = new Dictionary<int, string>()
+    {
+        { 0, "Off" },
+        { 1, "Every V blank" },
+        { 2, "Every second V blank" },
+        { 3, "Every third V blank" },
+        { 4, "Every fourth V blank" }
+    };
+
     private void Awake()
     {
         if (instance == null)
@@ -42,13 +64,12 @@ public class SettingsManager : MonoBehaviour
             Debug.Log("Instance already exists, destroying object!");
             Destroy(this);
         }
-    }
 
-    private void Start()
-    {
         GetSupportedResolutions();
         GetSupportedFullscreenModes();
         GetSupportedQualityPresets();
+        SetCurrentFps();
+        SetCurrentVSyncCount();
     }
 
     #region Fullscreen mode
@@ -62,9 +83,8 @@ public class SettingsManager : MonoBehaviour
             index++;
         }
 
-        currentFullScreenModeId = supportedFullscreenModes.FirstOrDefault(x => x.Value.Equals(Screen.fullScreenMode)).Key;
-        string currentFullScreenMode = supportedFullscreenModes[currentFullScreenModeId].ToString();
-        fullscreenModeText.text = char.ToUpper(currentFullScreenMode.First()) + currentFullScreenMode.Substring(1).ToLower();
+        currentFullScreenModeId = supportedFullscreenModes.FirstOrDefault(x => x.Value == Screen.fullScreenMode).Key;
+        fullscreenModeText.text = fullscreenModeNames[supportedFullscreenModes[currentFullScreenModeId]];
     }
 
     public void SetFullscreenMode(bool lower)
@@ -152,6 +172,106 @@ public class SettingsManager : MonoBehaviour
         }
 
         qualityPresetText.text = supportedQualityPresets[currentQualityPresetId];
+    }
+    #endregion
+
+    #region Frames per second
+    private void SetCurrentFps()
+    {
+        if (Application.targetFrameRate > 0)
+        {
+            currentFpsCap = Application.targetFrameRate;
+            fpsText.text = string.Concat(currentFpsCap.ToString(), " fps");
+        }
+        else
+        {
+            fpsText.text = string.Concat(currentFpsCap, " fps");
+        }
+    }
+
+    //public void ToggleFpsCap(bool enable)
+    //{
+    //    if (enable)
+    //    {
+    //        Application.targetFrameRate = currentFpsCap;
+
+    //        QualitySettings.vSyncCount = 0;
+    //        VSyncButton.enabled = false;
+    //    }
+    //    else
+    //    {
+    //        Application.targetFrameRate = -1;
+
+    //        QualitySettings.vSyncCount = currentVSyncCount;
+    //        VSyncButton.enabled = true;
+    //    }
+    //}
+
+    public void SetFps(bool lower)
+    {
+        if (lower && currentFpsCap - 1 >= minFps)
+        {
+            Application.targetFrameRate = currentFpsCap - 1;
+            currentFpsCap -= 1;
+        }
+        else if (lower == false && currentFpsCap + 1 <= maxFps)
+        {
+            Application.targetFrameRate = currentFpsCap + 1;
+            currentFpsCap += 1;
+        }
+        else
+        {
+            return;
+        }
+
+        fpsText.text = string.Concat(currentFpsCap.ToString(), " fps");
+    }
+    #endregion
+
+    #region VSync
+    private void SetCurrentVSyncCount()
+    {
+        currentVSyncCount = QualitySettings.vSyncCount;
+        vSyncText.text = supportedVSyncCounts[currentVSyncCount];
+    }
+
+    public void SetVSyncCount(bool lower)
+    {
+        if (lower && supportedVSyncCounts.ContainsKey(currentVSyncCount - 1))
+        {
+            QualitySettings.vSyncCount = currentVSyncCount - 1;
+            currentVSyncCount -= 1;
+        }
+        else if (lower == false && supportedVSyncCounts.ContainsKey(currentVSyncCount + 1))
+        {
+            QualitySettings.vSyncCount = currentVSyncCount + 1;
+            currentVSyncCount += 1;
+        }
+        else
+        {
+            return;
+        }
+
+        if (currentVSyncCount == 0)
+        {
+            for (int i = 0; i < fpsButtons.Length; i++)
+            {
+                fpsButtons[i].interactable = true;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < fpsButtons.Length; i++)
+            {
+                fpsButtons[i].interactable = false;
+            }
+
+            currentFpsCap = Screen.currentResolution.refreshRate;
+            Application.targetFrameRate = currentFpsCap;
+            fpsText.text = string.Concat(currentFpsCap.ToString(), " fps");
+        }
+
+        vSyncText.text = supportedVSyncCounts[currentVSyncCount];
     }
     #endregion
 }
