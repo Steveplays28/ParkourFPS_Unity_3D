@@ -6,16 +6,7 @@ public class CameraController : MonoBehaviour
     public float sensitivity = 100f;
     public float clampAngle = 90f;
 
-    private float verticalRotation;
-    private float horizontalRotation;
-
-    private void Start()
-    {
-        verticalRotation = transform.localEulerAngles.x;
-        horizontalRotation = player.transform.eulerAngles.y;
-    }
-
-    private void Update()
+    private void LateUpdate()
     {
         if (Cursor.lockState == CursorLockMode.Locked && !Cursor.visible)
         {
@@ -25,16 +16,8 @@ public class CameraController : MonoBehaviour
 
     private void Look()
     {
-        float _mouseVertical = -Input.GetAxis("Mouse Y");
-        float _mouseHorizontal = Input.GetAxis("Mouse X");
-
-        verticalRotation += _mouseVertical * sensitivity * Time.fixedDeltaTime;
-        horizontalRotation += _mouseHorizontal * sensitivity * Time.fixedDeltaTime;
-
-        verticalRotation = Mathf.Clamp(verticalRotation, -clampAngle, clampAngle);
-
-        transform.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
-        player.transform.rotation = Quaternion.Euler(0f, horizontalRotation, 0f);
+        transform.rotation *= Quaternion.Euler(Mathf.Clamp(-Input.GetAxis("Mouse Y") * sensitivity, -clampAngle, clampAngle), 0f, 0f);
+        player.transform.rotation *= Quaternion.Euler(0f, Mathf.Clamp(Input.GetAxis("Mouse X") * sensitivity, -clampAngle, clampAngle), 0f);
     }
 
     public void ToggleCursorMode()

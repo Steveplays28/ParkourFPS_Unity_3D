@@ -41,21 +41,21 @@ public class ClientHandle : MonoBehaviour
 
         if (GameManager.players.TryGetValue(id, out PlayerManager player))
         {
-            player.transform.DOMove(position, player.LerpTime);
+            player.transform.DOMove(position, player.lerpTime);
             //_player.transform.position = _position;
         }
     }
 
-    public static void PlayerRotation(Packet _packet)
+    public static void PlayerRotation(Packet packet)
     {
-        int _id = _packet.ReadInt();
-        Quaternion _playerRotation = _packet.ReadQuaternion();
-        Quaternion _cameraRotation = _packet.ReadQuaternion();
+        int id = packet.ReadInt();
+        Quaternion playerRotation = packet.ReadQuaternion();
+        Quaternion cameraRotation = packet.ReadQuaternion();
 
-        if (GameManager.players.TryGetValue(_id, out PlayerManager _player))
+        if (GameManager.players.TryGetValue(id, out PlayerManager player))
         {
-            _player.transform.rotation = _playerRotation;
-            _player.camera.transform.rotation = _cameraRotation;
+            player.transform.DORotate(playerRotation.eulerAngles, player.lerpTime);
+            player.camera.transform.DORotate(cameraRotation.eulerAngles, player.lerpTime);
         }
     }
 

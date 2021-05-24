@@ -128,7 +128,6 @@ public class PlayerController : MonoBehaviour
             Input.GetKey(KeyCode.D),
         };
 
-
         if (isPaused)
         {
             _inputs = new bool[4];

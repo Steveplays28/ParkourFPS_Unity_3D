@@ -16,7 +16,7 @@ public class EntityManager : MonoBehaviour
 
     [Header("Entity stats")]
     public int id;
-    public float LerpTime = 0.20f;
+    public float lerpTime = 0.20f;
     public float currentHealth;
     public float maxHealth = 100f;
     public int itemCount = 0;

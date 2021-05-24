@@ -214,7 +214,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 8283048436765457631}
-  sensitivity: 100
+  sensitivity: 5
   clampAngle: 90
 --- !u!114 &8473675638343676951
 MonoBehaviour:
