@@ -59,12 +59,12 @@ public class ClientHandle : MonoBehaviour
         }
     }
 
-    public static void PlayerDisconnected(Packet _packet)
+    public static void PlayerDisconnected(Packet packet)
     {
-        int _id = _packet.ReadInt();
+        int id = packet.ReadInt();
+        string reason = packet.ReadString();
 
-        Destroy(GameManager.players[_id].gameObject);
-        GameManager.players.Remove(_id);
+        GameManager.instance.DisconnectPlayer(id, reason);
     }
 
     public static void PlayerHealth(Packet _packet)

@@ -1,7 +1,7 @@
-using DG.Tweening;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class InputFieldSettings : MonoBehaviour
 {
@@ -17,22 +17,12 @@ public class InputFieldSettings : MonoBehaviour
         inputField = GetComponent<TMP_InputField>();
         placeholderText = inputField.placeholder.GetComponent<TMP_Text>();
 
-        inputField.onSelect.AddListener(delegate { OnSelect(); });
-        inputField.onDeselect.AddListener(delegate { OnDeSelect(); });
-    }
-
-    private void OnSelect()
-    {
-        StartCoroutine(DisablePlaceholder());
-    }
-
-    private void OnDeSelect()
-    {
-        if (disablePlaceholderOnSelect && inputField.text == "")
+        inputField.onSelect.AddListener(delegate
         {
             StopCoroutine(DisablePlaceholder());
-            placeholderText.color = new Color(placeholderText.color.r, placeholderText.color.g, placeholderText.color.b, 255);
-        }
+            StartCoroutine(DisablePlaceholder());
+        });
+        inputField.onEndEdit.AddListener(delegate { EnablePlaceholder(); });
     }
 
     private IEnumerator DisablePlaceholder()
@@ -41,6 +31,15 @@ public class InputFieldSettings : MonoBehaviour
         if (disablePlaceholderOnSelect && inputField.text == "")
         {
             placeholderText.color = new Color(placeholderText.color.r, placeholderText.color.g, placeholderText.color.b, 0);
+        }
+    }
+
+    private void EnablePlaceholder()
+    {
+        if (disablePlaceholderOnSelect && inputField.text == "")
+        {
+            StopCoroutine(DisablePlaceholder());
+            placeholderText.color = new Color(placeholderText.color.r, placeholderText.color.g, placeholderText.color.b, 255);
         }
     }
 }

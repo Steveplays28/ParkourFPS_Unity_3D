@@ -53,6 +53,14 @@ public class GameManager : MonoBehaviour
         UIManager.instance.OnConnected(_id);
     }
 
+    public void DisconnectPlayer(int id, string reason)
+    {
+        Destroy(players[id].gameObject);
+        players.Remove(id);
+
+        UIManager.instance.DisplayNotification(players[id] + " has left the game: " + reason);
+    }
+
     public void CreateItemSpawner(int _spawnerId, Vector3 _position, bool _hasItem)
     {
         GameObject _spawner = Instantiate(itemSpawnerPrefab, _position, itemSpawnerPrefab.transform.rotation);

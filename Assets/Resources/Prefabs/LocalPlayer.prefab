@@ -178,7 +178,7 @@ Camera:
   field of view: 90
   orthographic: 0
   orthographic size: 5
-  m_Depth: 0
+  m_Depth: 2
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -402,7 +402,7 @@ MonoBehaviour:
   - {fileID: 3772742346213610651}
   currentWeaponId: 0
   id: 0
-  LerpTime: 0.2
+  lerpTime: 0.2
   currentHealth: 100
   maxHealth: 100
   itemCount: 0

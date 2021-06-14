@@ -16,25 +16,42 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager instance;
 
+    [Space]
     public string dataPath;
+    public Camera UICamera;
 
     [Header("Debug Menu")]
     public TMP_Text fpsCounter;
+
+    [Space]
     public TMP_Text pingCounter;
-    public int updateInterval = 30;
-    private int frames = 0;
     public float ping;
+
+    [Space]
+    [SerializeField]
+    private int frames = 0;
+    public int updateInterval = 30;
 
     [Header("Main Menu")]
     public GameObject mainMenu;
+
+    [Space]
     public GameObject title;
     public Vector2 titleDefaultPosition = new Vector3(0, -180);
     public Vector2 titlePositionInOptionsMenu = new Vector3(250, -180);
     public float titleMoveTime = 0.5f;
+
+    [Space]
     public GameObject background;
+
+    [Space]
     public TMP_InputField usernameField;
     public TMP_Text usernameCharactersLeftText;
+
+    [Space]
     public TMP_InputField ipField;
+
+    [Space]
     public Button quitGameButton;
 
     public float menuPopOutTime = 0.5f;
@@ -47,7 +64,7 @@ public class UIManager : MonoBehaviour
     [Header("Options Menu")]
     public GameObject optionsMenu;
 
-    [Header("In-game")]
+    [Header("HUD")]
     public GameObject inGameUI;
     public Slider healthBar;
     public Text weaponName;
@@ -55,6 +72,11 @@ public class UIManager : MonoBehaviour
     public Volume volume;
 
     public GameObject currentOpenMenu;
+
+    [Header("Notifications")]
+    public GameObject notificationPrefab;
+    public int maxNotifications = 10;
+    public Dictionary<int, Notification> notifications = new Dictionary<int, Notification>();
 
     private void Awake()
     {
@@ -75,7 +97,7 @@ public class UIManager : MonoBehaviour
     private void Start()
     {
         //QualitySettings.vSyncCount = 1;
-        Application.targetFrameRate = SettingsManager.instance.maxFps;
+        Application.targetFrameRate = SettingsManager.instance.currentFpsCap;
 
         // Try to read data file from disk
         try
@@ -108,6 +130,11 @@ public class UIManager : MonoBehaviour
                 ping = Mathf.RoundToInt(Time.realtimeSinceStartup);
                 ClientSend.Ping();
             }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Backslash))
+        {
+            DisplayNotification(@"you pressed \");
         }
     }
 
@@ -277,8 +304,8 @@ public class UIManager : MonoBehaviour
     /// <summary>Opens the pause menu.</summary>
     public void OpenPauseMenu()
     {
-        pauseMenu.SetActive(true);
-        currentOpenMenu = pauseMenu;
+        OpenMenu(pauseMenu);
+        background.GetComponentInChildren<Image>().DOFade(1, menuPopInTime);
         GameManager.players[Client.instance.myId].gameObject.GetComponent<PlayerController>().isPaused = true;
         GameManager.players[Client.instance.myId].gameObject.GetComponentInChildren<CameraController>().ToggleCursorMode();
     }
@@ -286,8 +313,8 @@ public class UIManager : MonoBehaviour
     /// <summary>Closes the pause menu.</summary>
     public void ClosePauseMenu()
     {
-        pauseMenu.SetActive(false);
-        currentOpenMenu = null;
+        CloseMenu(pauseMenu);
+        background.GetComponentInChildren<Image>().DOFade(0, menuPopOutTime);
         GameManager.players[Client.instance.myId].gameObject.GetComponent<PlayerController>().isPaused = false;
         GameManager.players[Client.instance.myId].gameObject.GetComponentInChildren<CameraController>().ToggleCursorMode();
     }
@@ -377,6 +404,8 @@ public class UIManager : MonoBehaviour
         DiscordController.instance.currentPartySize = GameManager.players.Count;
         DiscordController.instance.UpdateActivity();
 
+        DisplayNotification(GameManager.players[playerId].username + " has joined the game");
+
         if (playerId != Client.instance.myId)
         {
             return;
@@ -384,10 +413,10 @@ public class UIManager : MonoBehaviour
 
         //Disable main menu
         CloseMenu(mainMenu);
-        usernameField.interactable = false;
-        ipField.interactable = false;
-        Camera.main.gameObject.SetActive(false);
-        background.SetActive(false);
+        CloseMenu(title);
+        CloseMenu(quitGameButton.gameObject);
+        background.GetComponentInChildren<Image>().DOFade(0, menuPopOutTime);
+        CameraFollow.instance.SetGameObjectToFollow(GameManager.players[Client.instance.myId].gameObject);
 
         //Enable in-game UI
         inGameUI.SetActive(true);
@@ -398,8 +427,7 @@ public class UIManager : MonoBehaviour
         UpdateWeapon();
 
         //Hide cursor
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        MouseCursor.instance.HideCursor();
 
         //Discord RPC
         DiscordController.instance.state = "In a game";
@@ -417,7 +445,7 @@ public class UIManager : MonoBehaviour
     public void OnDisconnected()
     {
         // Disable in-game UI
-        background.SetActive(true);
+        background.GetComponentInChildren<Image>().DOFade(1, menuPopInTime);
         inGameUI.SetActive(false);
         pingCounter.gameObject.SetActive(false);
         CloseMenu(pauseMenu);
@@ -435,6 +463,12 @@ public class UIManager : MonoBehaviour
     #endregion
 
     #region HUD
+    public void DisplayNotification(string text)
+    {
+        Notification notification = Instantiate(notificationPrefab, gameObject.transform).GetComponent<Notification>();
+        notification.Initialise(text);
+    }
+
     public void UpdateWeapon()
     {
         weaponName.text = GameManager.players[Client.instance.myId].weaponManager.weaponName;

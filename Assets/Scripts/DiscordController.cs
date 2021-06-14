@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using System;
 using System.Text;
 using UnityEngine;
@@ -11,18 +12,31 @@ public class DiscordController : MonoBehaviour
     private Discord.ActivityManager activityManager;
 
     [Header("Rich Presence")]
+    [OnValueChanged("UpdateActivity")]
     public string state;
+    [OnValueChanged("UpdateActivity")]
     public string details;
 
+    [Space]
+    [OnValueChanged("UpdateActivity")]
     public string largeImage;
+    [OnValueChanged("UpdateActivity")]
     public string largeImageTooltip;
+    [OnValueChanged("UpdateActivity")]
     public string smallImage;
+    [OnValueChanged("UpdateActivity")]
     public string smallImageTooltip;
 
+    [Space]
+    [OnValueChanged("UpdateActivity")]
     public long startTime;
+    [OnValueChanged("UpdateActivity")]
     public long endTime;
 
+    [Space]
+    [OnValueChanged("UpdateActivity")]
     public int currentPartySize;
+    [OnValueChanged("UpdateActivity")]
     public int maxPartySize;
 
     private void Awake()

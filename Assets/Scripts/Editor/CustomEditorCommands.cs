@@ -5,9 +5,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [InitializeOnLoad]
-public static class EditorUtility
+public static class CustomEditorCommands
 {
-    static EditorUtility()
+    static CustomEditorCommands()
     {
         EditorApplication.playModeStateChanged += LoadDefaultScene;
     }
@@ -25,7 +25,7 @@ public static class EditorUtility
         }
     }
 
-    [MenuItem("Tools/Load Level Editor scene")]
+    [MenuItem("Tools/Load Level Editor scene", false, 100000)]
     static void LoadLevelEditorScene()
     {
         SceneManager.LoadScene("Level Editor", LoadSceneMode.Single);
@@ -34,7 +34,7 @@ public static class EditorUtility
         UIManager.instance.ipField.interactable = false;
     }
 
-    [MenuItem("Tools/Toggle fps cap")]
+    [MenuItem("Tools/Toggle fps cap", false, 100000)]
     static void ToggleFpsCap()
     {
         if (Application.targetFrameRate == 60)
