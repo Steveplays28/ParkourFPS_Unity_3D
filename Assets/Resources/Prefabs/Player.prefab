@@ -212,6 +212,8 @@ MonoBehaviour:
   maxHealth: 100
   itemCount: 0
   username: 
+  cameraRotateSpeed: 0.5
+  cameraRotationAmount: 15
 --- !u!1001 &1470251195712096879
 PrefabInstance:
   m_ObjectHideFlags: 0

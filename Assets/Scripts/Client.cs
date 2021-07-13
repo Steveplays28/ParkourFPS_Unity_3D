@@ -50,7 +50,6 @@ public class Client : MonoBehaviour
         tcp = new TCP();
         udp = new UDP();
 
-        InitializeClientData();
 
         tcp.Connect(); // Connect tcp, udp gets connected once tcp is done
     }
@@ -86,10 +85,10 @@ public class Client : MonoBehaviour
                 return;
             }
 
+            instance.InitializeClientData();
+
             stream = socket.GetStream();
-
             receivedData = new Packet();
-
             stream.BeginRead(receiveBuffer, 0, dataBufferSize, ReceiveCallback, null);
         }
 
@@ -311,7 +310,8 @@ public class Client : MonoBehaviour
             { (int)ServerPackets.playerPosition, ClientHandle.PlayerPosition },
             { (int)ServerPackets.playerRotation, ClientHandle.PlayerRotation },
             { (int)ServerPackets.playerDisconnected, ClientHandle.PlayerDisconnected },
-            { (int)ServerPackets.playerHealth, ClientHandle.PlayerHealth },
+            { (int)ServerPackets.entityHit, ClientHandle.EntityHit },
+            { (int)ServerPackets.entityHeal, ClientHandle.EntityHeal },
             { (int)ServerPackets.playerRespawned, ClientHandle.PlayerRespawned },
             { (int)ServerPackets.createItemSpawner, ClientHandle.CreateItemSpawner },
             { (int)ServerPackets.itemSpawned, ClientHandle.ItemSpawned },
@@ -325,6 +325,9 @@ public class Client : MonoBehaviour
             { (int)ServerPackets.playerShoot, ClientHandle.PlayerShoot },
             { (int)ServerPackets.playerEquipWeapon, ClientHandle.PlayerEquipWeapon },
             { (int)ServerPackets.playerReloadWeapon, ClientHandle.PlayerReloadWeapon },
+            { (int)ServerPackets.entityStartWallrun, ClientHandle.EntityStartWallrun },
+            { (int)ServerPackets.entityStopWallrun, ClientHandle.EntityStopWallrun },
+
         };
         Debug.Log("Initialized packets.");
     }
@@ -352,7 +355,7 @@ public class Client : MonoBehaviour
                 Debug.LogError("Failed closing the UDP socket: socket is null");
             }
 
-            GameManager.players = new Dictionary<int, PlayerManager>();
+            GameManager.gameObjects = new Dictionary<int, GameObject>();
             GameManager.itemSpawners = new Dictionary<int, ItemSpawner>();
             GameManager.projectiles = new Dictionary<int, ProjectileManager>();
             GameManager.enemies = new Dictionary<int, EnemyManager>();

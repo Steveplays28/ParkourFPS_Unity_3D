@@ -406,6 +406,11 @@ MonoBehaviour:
   currentHealth: 100
   maxHealth: 100
   itemCount: 0
+  kills: 0
+  deaths: 0
+  assists: 0
+  playerController: {fileID: 6761221046541469059}
+  cameraController: {fileID: 2888799594428538753}
   username: 
 --- !u!114 &6761221046541469059
 MonoBehaviour:

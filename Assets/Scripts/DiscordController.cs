@@ -98,8 +98,9 @@ public class DiscordController : MonoBehaviour
         state = "In main menu";
         details = "";
         largeImageTooltip = "";
-        startTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         UpdateActivity();
+
+        UIManager.instance.OnMainMenuLoaded();
     }
 
     private void LogProblemsFunction(Discord.LogLevel level, string message)

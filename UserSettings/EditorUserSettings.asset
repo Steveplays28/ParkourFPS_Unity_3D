@@ -6,15 +6,21 @@ EditorUserSettings:
   serializedVersion: 4
   m_ConfigSettings:
     RecentlyUsedScenePath-0:
-      value: 22424703114646680e0b0227036c7e021319196439262f2434
-      flags: 0
-    RecentlyUsedScenePath-1:
       value: 22424703114646680e0b0227036c73150012146a092c2f24223b5326ece92021
       flags: 0
+    RecentlyUsedScenePath-1:
+      value: 22424703114646680e0b0227036c7e021319196439262f2434
+      flags: 0
     RecentlyUsedScenePath-2:
-      value: 22424703114646680e0b0227036c72111f19563f22213229
+      value: 224247031146466806170e2d086c6c1313191d6521292f3e1e2a183de7ae2136ebf32f
       flags: 0
     RecentlyUsedScenePath-3:
+      value: 2242470311464669081d033702205a03593e153a233a3223621a162ae0ef2c77d1e433e7e275323d300cdc3f01300471e704001fef
+      flags: 0
+    RecentlyUsedScenePath-4:
+      value: 22424703114646680e0b0227036c72111f19563f22213229
+      flags: 0
+    RecentlyUsedScenePath-5:
       value: 22424703114646680e0b0227036c761e1f03112b202135313920123dacf53a31f6fe
       flags: 0
     UnityEditor.ShaderGraph.FloatingWindowsLayout2:

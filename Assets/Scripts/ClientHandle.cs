@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using DG.Tweening;
 using System.Net;
 using UnityEngine;
-using DG.Tweening;
 
 public class ClientHandle : MonoBehaviour
 {
@@ -39,8 +37,10 @@ public class ClientHandle : MonoBehaviour
         int id = packet.ReadInt();
         Vector3 position = packet.ReadVector3();
 
-        if (GameManager.players.TryGetValue(id, out PlayerManager player))
+        if (GameManager.gameObjects.TryGetValue(id, out GameObject gameObject))
         {
+            PlayerManager player = gameObject.GetComponent<PlayerManager>();
+
             player.transform.DOMove(position, player.lerpTime);
             //_player.transform.position = _position;
         }
@@ -52,8 +52,10 @@ public class ClientHandle : MonoBehaviour
         Quaternion playerRotation = packet.ReadQuaternion();
         Quaternion cameraRotation = packet.ReadQuaternion();
 
-        if (GameManager.players.TryGetValue(id, out PlayerManager player))
+        if (GameManager.gameObjects.TryGetValue(id, out GameObject gameObject))
         {
+            PlayerManager player = gameObject.GetComponent<PlayerManager>();
+
             player.transform.DORotate(playerRotation.eulerAngles, player.lerpTime);
             player.camera.transform.DORotate(cameraRotation.eulerAngles, player.lerpTime);
         }
@@ -67,19 +69,33 @@ public class ClientHandle : MonoBehaviour
         GameManager.instance.DisconnectPlayer(id, reason);
     }
 
-    public static void PlayerHealth(Packet _packet)
+    public static void EntityHit(Packet packet)
     {
-        int _id = _packet.ReadInt();
-        float _health = _packet.ReadFloat();
+        int id = packet.ReadInt();
+        int hitBy = packet.ReadInt();
+        float amount = packet.ReadFloat();
 
-        GameManager.players[_id].SetHealth(_health);
+        GameManager.gameObjects[id].GetComponent<EntityManager>().Hit(GameManager.gameObjects[hitBy], amount);
+    }
+    public static void EntityHeal (Packet packet)
+    {
+        int id = packet.ReadInt();
+        int hitBy = packet.ReadInt();
+        float amount = packet.ReadFloat();
+
+        GameManager.gameObjects[id].GetComponent<EntityManager>().Heal(GameManager.gameObjects[hitBy], amount);
     }
 
-    public static void PlayerRespawned(Packet _packet)
+    public static void PlayerRespawned(Packet packet)
     {
-        int _id = _packet.ReadInt();
+        int id = packet.ReadInt();
 
-        GameManager.players[_id].Respawn();
+        if (GameManager.gameObjects.TryGetValue(id, out GameObject gameObject))
+        {
+            PlayerManager player = gameObject.GetComponent<PlayerManager>();
+
+            player.Respawn();
+        }
     }
 
     public static void CreateItemSpawner(Packet _packet)
@@ -98,13 +114,17 @@ public class ClientHandle : MonoBehaviour
         GameManager.itemSpawners[_spawnerId].ItemSpawned();
     }
 
-    public static void ItemPickedUp(Packet _packet)
+    public static void ItemPickedUp(Packet packet)
     {
-        int _spawnerId = _packet.ReadInt();
-        int _byPlayer = _packet.ReadInt();
+        int spawnerId = packet.ReadInt();
+        int byPlayer = packet.ReadInt();
 
-        GameManager.itemSpawners[_spawnerId].ItemPickedUp();
-        GameManager.players[_byPlayer].itemCount++;
+        GameManager.itemSpawners[spawnerId].ItemPickedUp();
+        if (GameManager.gameObjects.TryGetValue(byPlayer, out GameObject gameObject))
+        {
+            PlayerManager player = gameObject.GetComponent<PlayerManager>();
+            player.itemCount++;
+        }
     }
 
     public static void SpawnProjectile(Packet _packet)
@@ -114,7 +134,11 @@ public class ClientHandle : MonoBehaviour
         int _thrownByPlayer = _packet.ReadInt();
 
         GameManager.instance.SpawnProjectile(_projectileId, _position);
-        GameManager.players[_thrownByPlayer].itemCount--;
+        if (GameManager.gameObjects.TryGetValue(_thrownByPlayer, out GameObject gameObject))
+        {
+            PlayerManager player = gameObject.GetComponent<PlayerManager>();
+            player.itemCount--;
+        }
     }
 
     public static void ProjectilePosition(Packet _packet)
@@ -163,25 +187,65 @@ public class ClientHandle : MonoBehaviour
         GameManager.enemies[_enemyId].SetHealth(_health);
     }
 
-    public static void PlayerShoot(Packet _packet)
+    public static void PlayerShoot(Packet packet)
     {
-        int _id = _packet.ReadInt();
+        int id = packet.ReadInt();
 
-        GameManager.players[_id].weaponManager.Shoot();
+        if (GameManager.gameObjects.TryGetValue(id, out GameObject fetchedGameObject))
+        {
+            PlayerManager player = fetchedGameObject.GetComponent<PlayerManager>();
+
+            player.weaponManager.Shoot();
+        }
     }
 
-    public static void PlayerEquipWeapon(Packet _packet)
+    public static void PlayerEquipWeapon(Packet packet)
     {
-        int _id = _packet.ReadInt();
-        int _weaponId = _packet.ReadInt();
+        int id = packet.ReadInt();
+        int weaponId = packet.ReadInt();
 
-        GameManager.players[_id].EquipWeapon(_weaponId);
+        if (GameManager.gameObjects.TryGetValue(id, out GameObject fetchedGameObject))
+        {
+            PlayerManager player = fetchedGameObject.GetComponent<PlayerManager>();
+
+            player.EquipWeapon(weaponId);
+        }
     }
 
-    public static void PlayerReloadWeapon(Packet _packet)
+    public static void PlayerReloadWeapon(Packet packet)
     {
-        int _id = _packet.ReadInt();
+        int id = packet.ReadInt();
 
-        GameManager.players[_id].weaponManager.StartCoroutine(GameManager.players[_id].weaponManager.Reload());
+        if (GameManager.gameObjects.TryGetValue(id, out GameObject fetchedGameObject))
+        {
+            PlayerManager player = fetchedGameObject.GetComponent<PlayerManager>();
+
+            player.weaponManager.StartCoroutine(player.weaponManager.Reload());
+        }
+    }
+
+    public static void EntityStartWallrun(Packet packet)
+    {
+        int id = packet.ReadInt();
+        bool leftSide = packet.ReadBool();
+
+        if (GameManager.gameObjects.TryGetValue(id, out GameObject fetchedGameObject))
+        {
+            PlayerManager player = fetchedGameObject.GetComponent<PlayerManager>();
+
+            player.StartWallrun(leftSide);
+        }
+    }
+
+    public static void EntityStopWallrun(Packet packet)
+    {
+        int id = packet.ReadInt();
+
+        if (GameManager.gameObjects.TryGetValue(id, out GameObject fetchedGameObject))
+        {
+            PlayerManager player = fetchedGameObject.GetComponent<PlayerManager>();
+
+            player.StopWallrun();
+        }
     }
 }

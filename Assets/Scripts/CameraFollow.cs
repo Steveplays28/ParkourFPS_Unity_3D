@@ -8,6 +8,7 @@ public class CameraFollow : MonoBehaviour
     public float entityHeadHeight = 0.75f;
     private GameObject gameObjectToFollow;
 
+    #region Singleton pattern
     private void Awake()
     {
         if (instance == null)
@@ -22,6 +23,7 @@ public class CameraFollow : MonoBehaviour
 
         DontDestroyOnLoad(this);
     }
+    #endregion
 
     private void LateUpdate()
     {
@@ -33,6 +35,7 @@ public class CameraFollow : MonoBehaviour
         if (gameObjectToFollow.TryGetComponent(out EntityManager entityManager))
         {
             transform.position = gameObjectToFollow.transform.position + new Vector3(0, 0, entityHeadHeight);
+            transform.rotation = gameObjectToFollow.transform.rotation;
         }
     }
 

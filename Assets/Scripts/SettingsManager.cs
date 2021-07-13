@@ -4,21 +4,31 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using NaughtyAttributes;
 
 public class SettingsManager : MonoBehaviour
 {
     public static SettingsManager instance;
 
+    [Space]
+    [Foldout("References")]
     public TMP_Text fullscreenModeText;
+    [Foldout("References")]
     public TMP_Text resolutionText;
+    [Foldout("References")]
     public TMP_Text qualityPresetText;
+    [Foldout("References")]
     public TMP_Text fpsText;
+    [Foldout("References")]
     public TMP_Text vSyncText;
 
+    [Foldout("References")]
     public Button VSyncButton;
+    [Foldout("References")]
     public Button[] fpsButtons;
 
-    [Header("Fullscreen modes")]
+    [Space]
+    [Foldout("Fullscreen modes")]
     public int currentFullScreenModeId;
     public Dictionary<int, FullScreenMode> supportedFullscreenModes = new Dictionary<int, FullScreenMode>();
     private Dictionary<FullScreenMode, string> fullscreenModeNames = new Dictionary<FullScreenMode, string>()
@@ -29,20 +39,26 @@ public class SettingsManager : MonoBehaviour
         { FullScreenMode.Windowed, "Windowed" }
     };
 
-    [Header("Resolutions")]
+    [Space]
+    [Foldout("Resolutions")]
     public int currentResolutionId;
     public Dictionary<int, Resolution> supportedResolutions = new Dictionary<int, Resolution>();
 
-    [Header("Quality presets")]
+    [Space]
+    [Foldout("Quality presets")]
     public int currentQualityPresetId;
     public Dictionary<int, string> supportedQualityPresets = new Dictionary<int, string>();
 
-    [Header("FPS Cap")]
+    [Space]
+    [Foldout("Fps cap")]
     public int currentFpsCap = 60;
+    [Foldout("Fps cap")]
     public int minFps = 1;
+    [Foldout("Fps cap")]
     public int maxFps = 360;
 
-    [Header("VSync")]
+    [Space]
+    [Foldout("VSync")]
     public int currentVSyncCount;
     public Dictionary<int, string> supportedVSyncCounts = new Dictionary<int, string>()
     {

@@ -1,9 +1,20 @@
-﻿using UnityEngine;
+﻿using DG.Tweening;
+using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class PlayerManager : EntityManager
 {
+    #region Variables
+    [Header("References")]
+    public PlayerController playerController;
+    public CameraController cameraController;
+
     [Header("Player stats")]
     public string username;
+
+    private float cameraRotateSpeed = 0.5f;
+    private float cameraRotationAmount = 15f;
+    #endregion
 
     public void Initialize(int _id, string _username)
     {
@@ -12,52 +23,32 @@ public class PlayerManager : EntityManager
         currentHealth = maxHealth;
 
         nameTag.text = username;
+        camera.GetUniversalAdditionalCameraData().cameraStack.Add(UIManager.instance.UICamera);
     }
 
-    public void SetHealth(float _health)
+    #region Health
+    public override void Hit(GameObject hitBy, float amount)
     {
-        currentHealth = _health;
+        base.Hit(hitBy, amount);
+
         if (id == Client.instance.myId)
         {
             UIManager.instance.healthBar.value = currentHealth;
             UIManager.instance.UpdateHealthEffect();
         }
-
-        if (currentHealth <= 0f)
-        {
-            Die();
-        }
     }
 
-    public void Die()
+    public override void Heal(GameObject hitBy, float amount)
     {
-        // Disable meshes
-        model.enabled = false;
-        glassesModel.enabled = false;
-        weaponManager.Disable();
-        nameTag.transform.parent.gameObject.SetActive(false);
-    }
+        base.Heal(hitBy, amount);
 
-    public void Respawn()
-    {
-        SetHealth(maxHealth);
-
-        // Reset weapons
-        foreach(WeaponManager weaponManager in weaponManagers)
-        {
-            weaponManager.ResetWeapon();
-        }
         if (id == Client.instance.myId)
         {
-            UIManager.instance.UpdateAmmo();
+            UIManager.instance.healthBar.value = currentHealth;
+            UIManager.instance.UpdateHealthEffect();
         }
-
-        // Enable meshes
-        model.enabled = true;
-        glassesModel.enabled = true;
-        weaponManager.Enable();
-        nameTag.transform.parent.gameObject.SetActive(true);
     }
+    #endregion
 
     public void EquipWeapon(int weaponId)
     {
@@ -76,5 +67,44 @@ public class PlayerManager : EntityManager
             UIManager.instance.UpdateWeapon();
             UIManager.instance.UpdateAmmo();
         }
+    }
+
+    public void StartWallrun(bool leftSide)
+    {
+        float side;
+        if (leftSide)
+        {
+            side = -1;
+        }
+        else
+        {
+            side = 1;
+        }
+
+        float angle = 0;
+        DOTween.To(() => angle, x => angle = x, cameraRotationAmount * side, cameraRotateSpeed)
+            .OnUpdate(() =>
+            {
+                camera.transform.eulerAngles = new Vector3(camera.transform.eulerAngles.x, camera.transform.eulerAngles.y, angle);
+            });
+    }
+
+    public void StopWallrun()
+    {
+        float angle = camera.transform.eulerAngles.z;
+        float zero;
+        if (angle > 180)
+        {
+            zero = 360f;
+        }
+        else
+        {
+            zero = 0f;
+        }
+        DOTween.To(() => angle, x => angle = x, zero, cameraRotateSpeed)
+            .OnUpdate(() =>
+            {
+                camera.transform.eulerAngles = new Vector3(camera.transform.eulerAngles.x, camera.transform.eulerAngles.y, angle);
+            });
     }
 }

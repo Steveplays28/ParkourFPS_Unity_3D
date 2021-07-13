@@ -1,6 +1,6 @@
 ﻿using DG.Tweening;
+using NaughtyAttributes;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,66 +18,88 @@ public class UIManager : MonoBehaviour
 
     [Space]
     public string dataPath;
+    public Camera normalCamera;
     public Camera UICamera;
+    public GameObject currentOpenMenu;
 
-    [Header("Debug Menu")]
+    [Foldout("Debug Menu")]
     public TMP_Text fpsCounter;
 
     [Space]
+    [Foldout("Debug Menu")]
     public TMP_Text pingCounter;
+    [Foldout("Debug Menu")]
     public float ping;
 
     [Space]
     [SerializeField]
+    [Foldout("Debug Menu")]
     private int frames = 0;
+    [Foldout("Debug Menu")]
     public int updateInterval = 30;
 
-    [Header("Main Menu")]
+    [Foldout("Main Menu")]
     public GameObject mainMenu;
 
     [Space]
+    [Foldout("Main Menu")]
     public GameObject title;
+    [Foldout("Main Menu")]
     public Vector2 titleDefaultPosition = new Vector3(0, -180);
+    [Foldout("Main Menu")]
     public Vector2 titlePositionInOptionsMenu = new Vector3(250, -180);
+    [Foldout("Main Menu")]
     public float titleMoveTime = 0.5f;
 
     [Space]
+    [Foldout("Main Menu")]
     public GameObject background;
 
     [Space]
+    [Foldout("Main Menu")]
     public TMP_InputField usernameField;
+    [Foldout("Main Menu")]
     public TMP_Text usernameCharactersLeftText;
 
     [Space]
+    [Foldout("Main Menu")]
     public TMP_InputField ipField;
 
     [Space]
+    [Foldout("Main Menu")]
     public Button quitGameButton;
 
+    [Foldout("Main Menu")]
     public float menuPopOutTime = 0.5f;
+    [Foldout("Main Menu")]
     public float menuPopInTime = 0.5f;
 
-    [Header("Pause Menu")]
+    [Foldout("Pause Menu")]
     public GameObject pauseMenu;
+    [Foldout("Pause Menu")]
     public Button disconnectButton;
 
-    [Header("Options Menu")]
+    [Foldout("Options Menu")]
     public GameObject optionsMenu;
 
-    [Header("HUD")]
+    [Foldout("HUD")]
     public GameObject inGameUI;
+    [Foldout("HUD")]
     public Slider healthBar;
+    [Foldout("HUD")]
     public Text weaponName;
+    [Foldout("HUD")]
     public Text ammoCounter;
+    [Foldout("HUD")]
     public Volume volume;
 
-    public GameObject currentOpenMenu;
-
-    [Header("Notifications")]
+    [Foldout("Notifications")]
     public GameObject notificationPrefab;
+    [Foldout("Notifications")]
     public int maxNotifications = 10;
     public Dictionary<int, Notification> notifications = new Dictionary<int, Notification>();
 
+    #region Singleton pattern
     private void Awake()
     {
         if (instance == null)
@@ -89,16 +111,17 @@ public class UIManager : MonoBehaviour
             Debug.Log("Instance already exists, destroying object!");
             Destroy(this);
         }
-        DontDestroyOnLoad(this);
 
-        dataPath = Application.persistentDataPath + "/Data.txt";
+        DontDestroyOnLoad(this);
     }
+    #endregion
 
     private void Start()
     {
         //QualitySettings.vSyncCount = 1;
         Application.targetFrameRate = SettingsManager.instance.currentFpsCap;
 
+        dataPath = Application.persistentDataPath + "/Data.txt";
         // Try to read data file from disk
         try
         {
@@ -138,6 +161,11 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void OnMainMenuLoaded()
+    {
+        normalCamera.GetUniversalAdditionalCameraData().cameraStack.Add(UICamera);
+    }
+
     #region Files
     private string ReadLine(string filePath, int lineNumber)
     {
@@ -163,6 +191,11 @@ public class UIManager : MonoBehaviour
     {
         try
         {
+            if (!File.Exists(dataPath))
+            {
+                File.Create(dataPath);
+            }
+
             List<string> lines = File.ReadLines(filePath).ToList();
             if (lines.Count < 1)
             {
@@ -207,40 +240,16 @@ public class UIManager : MonoBehaviour
 
     public void SaveUsername()
     {
-        try
-        {
-            if (!File.Exists(dataPath))
-            {
-                File.Create(dataPath);
-            }
-
-            WriteLine(dataPath, 1, usernameField.text);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Caught exception: " + e);
-        }
+        WriteLine(dataPath, 1, usernameField.text);
     }
 
     public void SaveIp()
     {
-        try
-        {
-            if (!File.Exists(dataPath))
-            {
-                File.Create(dataPath);
-            }
-
-            WriteLine(dataPath, 2, ipField.text);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Caught exception: " + e);
-        }
+        WriteLine(dataPath, 2, ipField.text);
     }
 
     /// <summary>Closes a menu.</summary>
-    /// <param name="_menu">The menu to close.</param>
+    /// <param name="menu">The menu to close.</param>
     public void CloseMenu(GameObject menu)
     {
         foreach (Button button in menu.GetComponentsInChildren<Button>())
@@ -258,47 +267,38 @@ public class UIManager : MonoBehaviour
             }
         }
         currentOpenMenu = null;
-        menu.GetComponent<RectTransform>().DOScale(Vector3.zero, menuPopOutTime);
-        StartCoroutine(WaitAndCloseMenu(menu));
-    }
-
-    private IEnumerator WaitAndCloseMenu(GameObject menu)
-    {
-        yield return new WaitForSeconds(menuPopOutTime);
-        if (menu.activeInHierarchy)
+        menu.GetComponent<RectTransform>().DOScale(Vector3.zero, menuPopOutTime).onComplete = () =>
         {
-            menu.SetActive(false);
-        }
+            if (menu.activeInHierarchy)
+            {
+                menu.SetActive(false);
+            }
+        };
     }
 
     /// <summary>Opens a menu.</summary>
-    /// <param name="_menu">The menu to open.</param>
+    /// <param name="menu">The menu to open.</param>
     public void OpenMenu(GameObject menu)
     {
         currentOpenMenu = menu;
         menu.SetActive(true);
-        menu.GetComponent<RectTransform>().DOScale(Vector3.one, menuPopInTime);
-        StartCoroutine(WaitAndOpenMenu(menu));
-    }
-
-    private IEnumerator WaitAndOpenMenu(GameObject menu)
-    {
-        yield return new WaitForSeconds(menuPopInTime);
-
-        foreach (Button button in menu.GetComponentsInChildren<Button>())
+        menu.GetComponent<RectTransform>().DOScale(Vector3.one, menuPopInTime).onComplete = () =>
         {
-            if (button.interactable == false)
+            foreach (Button button in menu.GetComponentsInChildren<Button>())
             {
-                button.interactable = true;
+                if (button.interactable == false)
+                {
+                    button.interactable = true;
+                }
             }
-        }
-        foreach (TMP_InputField inputField in menu.GetComponentsInChildren<TMP_InputField>())
-        {
-            if (inputField.interactable == false)
+            foreach (TMP_InputField inputField in menu.GetComponentsInChildren<TMP_InputField>())
             {
-                inputField.interactable = true;
+                if (inputField.interactable == false)
+                {
+                    inputField.interactable = true;
+                }
             }
-        }
+        };
     }
 
     /// <summary>Opens the pause menu.</summary>
@@ -306,8 +306,14 @@ public class UIManager : MonoBehaviour
     {
         OpenMenu(pauseMenu);
         background.GetComponentInChildren<Image>().DOFade(1, menuPopInTime);
-        GameManager.players[Client.instance.myId].gameObject.GetComponent<PlayerController>().isPaused = true;
-        GameManager.players[Client.instance.myId].gameObject.GetComponentInChildren<CameraController>().ToggleCursorMode();
+
+        if (GameManager.gameObjects.TryGetValue(Client.instance.myId, out GameObject gameObject))
+        {
+            PlayerManager player = gameObject.GetComponent<PlayerManager>();
+
+            player.playerController.isPaused = true;
+            player.cameraController.ToggleCursorMode();
+        }
     }
 
     /// <summary>Closes the pause menu.</summary>
@@ -315,8 +321,14 @@ public class UIManager : MonoBehaviour
     {
         CloseMenu(pauseMenu);
         background.GetComponentInChildren<Image>().DOFade(0, menuPopOutTime);
-        GameManager.players[Client.instance.myId].gameObject.GetComponent<PlayerController>().isPaused = false;
-        GameManager.players[Client.instance.myId].gameObject.GetComponentInChildren<CameraController>().ToggleCursorMode();
+
+        if (GameManager.gameObjects.TryGetValue(Client.instance.myId, out GameObject gameObject))
+        {
+            PlayerManager player = gameObject.GetComponent<PlayerManager>();
+
+            player.playerController.isPaused = false;
+            player.cameraController.ToggleCursorMode();
+        }
     }
 
     /// <summary>Opens the options menu.</summary>
@@ -355,7 +367,7 @@ public class UIManager : MonoBehaviour
     public void QuitGame()
     {
 #if UNITY_EDITOR
-        EditorApplication.isPlaying = false;
+        EditorApplication.ExitPlaymode();
 #else
         Application.Quit();
 #endif
@@ -401,35 +413,45 @@ public class UIManager : MonoBehaviour
 
     public void OnConnected(int playerId)
     {
-        DiscordController.instance.currentPartySize = GameManager.players.Count;
+        DiscordController.instance.currentPartySize = GameManager.gameObjects.Count;
         DiscordController.instance.UpdateActivity();
 
-        DisplayNotification(GameManager.players[playerId].username + " has joined the game");
+        if (GameManager.gameObjects.TryGetValue(playerId, out GameObject fetchedGameObject))
+        {
+            PlayerManager player = fetchedGameObject.GetComponent<PlayerManager>();
+
+            DisplayNotification(player.username + " has joined the game");
+        }
 
         if (playerId != Client.instance.myId)
         {
             return;
         }
 
-        //Disable main menu
+        // Disable main menu
+        normalCamera.gameObject.SetActive(false);
         CloseMenu(mainMenu);
         CloseMenu(title);
         CloseMenu(quitGameButton.gameObject);
         background.GetComponentInChildren<Image>().DOFade(0, menuPopOutTime);
-        CameraFollow.instance.SetGameObjectToFollow(GameManager.players[Client.instance.myId].gameObject);
 
-        //Enable in-game UI
+        // Enable in-game UI
         inGameUI.SetActive(true);
         pingCounter.gameObject.SetActive(true);
-        healthBar.maxValue = GameManager.players[Client.instance.myId].maxHealth;
-        healthBar.value = GameManager.players[Client.instance.myId].currentHealth;
+        if (GameManager.gameObjects.TryGetValue(Client.instance.myId, out GameObject fetchedGameObjectTwo))
+        {
+            PlayerManager player = fetchedGameObjectTwo.GetComponent<PlayerManager>();
+
+            healthBar.maxValue = player.maxHealth;
+            healthBar.value = player.currentHealth;
+        }
         UpdateAmmo();
         UpdateWeapon();
 
-        //Hide cursor
-        MouseCursor.instance.HideCursor();
+        // Hide cursor
+        CustomMouseCursor.instance.HideCursor();
 
-        //Discord RPC
+        // Discord RPC
         DiscordController.instance.state = "In a game";
         DiscordController.instance.details = "Team Deathmatch | n - n";
         DiscordController.instance.largeImageTooltip = "Map: " + SceneManager.GetActiveScene().name;
@@ -466,25 +488,55 @@ public class UIManager : MonoBehaviour
     public void DisplayNotification(string text)
     {
         Notification notification = Instantiate(notificationPrefab, gameObject.transform).GetComponent<Notification>();
+        notifications.Add(notifications.Count, notification);
         notification.Initialise(text);
+
+        for (int i = 0; i < notifications.Count; i++)
+        {
+            GameObject fetchedNotification = notifications[i].gameObject;
+            Notification fetchedNotifComp = fetchedNotification.GetComponent<Notification>();
+
+            fetchedNotification.GetComponent<RectTransform>().DOAnchorPosY(fetchedNotifComp.currentPosition.y - fetchedNotifComp.moveDownAmount, fetchedNotifComp.lerpDuration);
+            fetchedNotifComp.currentPosition -= new Vector2(0, fetchedNotifComp.moveDownAmount);
+
+            if (i > maxNotifications)
+            {
+                fetchedNotification.GetComponent<TMP_Text>().DOFade(0, fetchedNotifComp.lerpDuration);
+            }
+        }
     }
 
     public void UpdateWeapon()
     {
-        weaponName.text = GameManager.players[Client.instance.myId].weaponManager.weaponName;
+        if (GameManager.gameObjects.TryGetValue(Client.instance.myId, out GameObject fetchedGameObject))
+        {
+            PlayerManager player = fetchedGameObject.GetComponent<PlayerManager>();
+
+            weaponName.text = player.weaponManager.weaponName;
+        }
     }
 
     public void UpdateAmmo()
     {
-        ammoCounter.text = string.Concat(GameManager.players[Client.instance.myId].weaponManager.currentAmmo.ToString(), "/", GameManager.players[Client.instance.myId].weaponManager.maxAmmo.ToString());
+        if (GameManager.gameObjects.TryGetValue(Client.instance.myId, out GameObject fetchedGameObject))
+        {
+            PlayerManager player = fetchedGameObject.GetComponent<PlayerManager>();
+
+            ammoCounter.text = string.Concat(player.weaponManager.currentAmmo.ToString(), "/", player.weaponManager.maxAmmo.ToString());
+        }
     }
 
     public void UpdateHealthEffect()
     {
-        Vignette vignette;
-        volume.profile.TryGet(out vignette);
+        if (GameManager.gameObjects.TryGetValue(Client.instance.myId, out GameObject fetchedGameObject))
+        {
+            PlayerManager player = fetchedGameObject.GetComponent<PlayerManager>();
 
-        DOTween.To(() => vignette.intensity.value, x => vignette.intensity.value = x, 1 - GameManager.players[Client.instance.myId].currentHealth / 100, 0.5f);
+            Vignette vignette;
+            volume.profile.TryGet(out vignette);
+
+            DOTween.To(() => vignette.intensity.value, x => vignette.intensity.value = x, 1 - player.currentHealth / 100, 0.5f);
+        }
     }
     #endregion
 }

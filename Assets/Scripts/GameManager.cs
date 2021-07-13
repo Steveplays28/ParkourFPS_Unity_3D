@@ -3,9 +3,12 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    #region Variables
     public static GameManager instance;
 
-    public static Dictionary<int, PlayerManager> players = new Dictionary<int, PlayerManager>();
+    public static Dictionary<int, GameObject> gameObjects = new Dictionary<int, GameObject>();
+
+    //public static Dictionary<int, PlayerManager> players = new Dictionary<int, PlayerManager>();
     public static Dictionary<int, ItemSpawner> itemSpawners = new Dictionary<int, ItemSpawner>();
     public static Dictionary<int, ProjectileManager> projectiles = new Dictionary<int, ProjectileManager>();
     public static Dictionary<int, EnemyManager> enemies = new Dictionary<int, EnemyManager>();
@@ -15,6 +18,7 @@ public class GameManager : MonoBehaviour
     public GameObject itemSpawnerPrefab;
     public GameObject projectilePrefab;
     public GameObject enemyPrefab;
+    #endregion
 
     private void Awake()
     {
@@ -30,35 +34,42 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>Spawns a player.</summary>
-    /// <param name="_id">The player's ID.</param>
-    /// <param name="_name">The player's name.</param>
-    /// <param name="_position">The player's starting position.</param>
-    /// <param name="_rotation">The player's starting rotation.</param>
-    public void SpawnPlayer(int _id, string _username, Vector3 _position, Quaternion _rotation)
+    /// <param name="id">The player's ID.</param>
+    /// <param name="username">The player's name.</param>
+    /// <param name="position">The player's starting position.</param>
+    /// <param name="rotation">The player's starting rotation.</param>
+    public void SpawnPlayer(int id, string username, Vector3 position, Quaternion rotation)
     {
-        GameObject _player;
-        if (_id == Client.instance.myId)
+        GameObject player;
+        if (id == Client.instance.myId)
         {
-            _player = Instantiate(localPlayerPrefab, _position, _rotation);
+            player = Instantiate(localPlayerPrefab, position, rotation);
         }
         else
         {
-            _player = Instantiate(playerPrefab, _position, _rotation);
+            player = Instantiate(playerPrefab, position, rotation);
         }
 
-        _player.GetComponent<PlayerManager>().Initialize(_id, _username);
-        players.Add(_id, _player.GetComponent<PlayerManager>());
+        player.GetComponent<PlayerManager>().Initialize(id, username);
+        gameObjects.Add(id, player);
 
         //On connected to server
-        UIManager.instance.OnConnected(_id);
+        UIManager.instance.OnConnected(id);
     }
 
     public void DisconnectPlayer(int id, string reason)
     {
-        Destroy(players[id].gameObject);
-        players.Remove(id);
+        Destroy(gameObjects[id]);
+        gameObjects.Remove(id);
 
-        UIManager.instance.DisplayNotification(players[id] + " has left the game: " + reason);
+        UIManager.instance.DisplayNotification(gameObjects[id].GetComponent<PlayerManager>().username + " has left the game: " + reason);
+    }
+
+    public void SpawnEnemy(int _id, Vector3 _position)
+    {
+        GameObject _enemy = Instantiate(enemyPrefab, _position, Quaternion.identity);
+        _enemy.GetComponent<EnemyManager>().Initialize(_id);
+        enemies.Add(_id, _enemy.GetComponent<EnemyManager>());
     }
 
     public void CreateItemSpawner(int _spawnerId, Vector3 _position, bool _hasItem)
@@ -73,12 +84,5 @@ public class GameManager : MonoBehaviour
         GameObject _projectile = Instantiate(projectilePrefab, _position, Quaternion.identity);
         _projectile.GetComponent<ProjectileManager>().Initialize(_id);
         projectiles.Add(_id, _projectile.GetComponent<ProjectileManager>());
-    }
-
-    public void SpawnEnemy(int _id, Vector3 _position)
-    {
-        GameObject _enemy = Instantiate(enemyPrefab, _position, Quaternion.identity);
-        _enemy.GetComponent<EnemyManager>().Initialize(_id);
-        enemies.Add(_id, _enemy.GetComponent<EnemyManager>());
     }
 }

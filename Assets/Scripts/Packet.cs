@@ -12,7 +12,8 @@ public enum ServerPackets
     playerPosition,
     playerRotation,
     playerDisconnected,
-    playerHealth,
+    entityHit,
+    entityHeal,
     playerRespawned,
     createItemSpawner,
     itemSpawned,
@@ -25,7 +26,9 @@ public enum ServerPackets
     enemyHealth,
     playerShoot,
     playerEquipWeapon,
-    playerReloadWeapon
+    playerReloadWeapon,
+    entityStartWallrun,
+    entityStopWallrun
 }
 
 /// <summary>Sent from client to server.</summary>
