@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -18,6 +20,10 @@ public class GameManager : MonoBehaviour
     public GameObject itemSpawnerPrefab;
     public GameObject projectilePrefab;
     public GameObject enemyPrefab;
+
+    public event Action<AsyncOperation> MainMenuLoaded;
+    public event Action<int> PlayerConnected;
+    public event Action<int, string> PlayerDisconnected;
     #endregion
 
     private void Awake()
@@ -29,13 +35,25 @@ public class GameManager : MonoBehaviour
         else if (instance != this)
         {
             Debug.Log("Instance already exists, destroying object!");
-            Destroy(this);
+            Destroy(gameObject);
         }
+    }
+
+    private void Start()
+    {
+        AsyncOperation sceneLoadAsyncOperation;
+        sceneLoadAsyncOperation = SceneManager.LoadSceneAsync(1, LoadSceneMode.Single);
+        sceneLoadAsyncOperation.completed += OnMainMenuLoaded;
+    }
+
+    private void OnMainMenuLoaded(AsyncOperation asyncOperation)
+    {
+        MainMenuLoaded?.Invoke(asyncOperation);
     }
 
     /// <summary>Spawns a player.</summary>
     /// <param name="id">The player's ID.</param>
-    /// <param name="username">The player's name.</param>
+    /// <param name="username">The player's username.</param>
     /// <param name="position">The player's starting position.</param>
     /// <param name="rotation">The player's starting rotation.</param>
     public void SpawnPlayer(int id, string username, Vector3 position, Quaternion rotation)
@@ -53,8 +71,8 @@ public class GameManager : MonoBehaviour
         player.GetComponent<PlayerManager>().Initialize(id, username);
         gameObjects.Add(id, player);
 
-        //On connected to server
-        UIManager.instance.OnConnected(id);
+        // Trigger PlayerConnected event
+        PlayerConnected?.Invoke(id);
     }
 
     public void DisconnectPlayer(int id, string reason)
@@ -62,7 +80,8 @@ public class GameManager : MonoBehaviour
         Destroy(gameObjects[id]);
         gameObjects.Remove(id);
 
-        UIManager.instance.DisplayNotification(gameObjects[id].GetComponent<PlayerManager>().username + " has left the game: " + reason);
+        // Trigger PlayerDisconnected event
+        PlayerDisconnected?.Invoke(id, reason);
     }
 
     public void SpawnEnemy(int _id, Vector3 _position)

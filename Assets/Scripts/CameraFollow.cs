@@ -8,7 +8,6 @@ public class CameraFollow : MonoBehaviour
     public float entityHeadHeight = 0.75f;
     private GameObject gameObjectToFollow;
 
-    #region Singleton pattern
     private void Awake()
     {
         if (instance == null)
@@ -18,12 +17,9 @@ public class CameraFollow : MonoBehaviour
         else if (instance != this)
         {
             Debug.Log("Instance already exists, destroying object!");
-            Destroy(this);
+            Destroy(gameObject);
         }
-
-        DontDestroyOnLoad(this);
     }
-    #endregion
 
     private void LateUpdate()
     {

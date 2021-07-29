@@ -2,10 +2,10 @@ using NaughtyAttributes;
 using System;
 using System.Text;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class DiscordController : MonoBehaviour
 {
+    #region Variables
     public static DiscordController instance;
 
     private Discord.Discord discord;
@@ -38,11 +38,10 @@ public class DiscordController : MonoBehaviour
     public int currentPartySize;
     [OnValueChanged("UpdateActivity")]
     public int maxPartySize;
+    #endregion
 
     private void Awake()
     {
-        DontDestroyOnLoad(this);
-
         if (instance == null)
         {
             instance = this;
@@ -50,7 +49,7 @@ public class DiscordController : MonoBehaviour
         else if (instance != this)
         {
             Debug.Log("Instance already exists, destroying object!");
-            Destroy(this);
+            Destroy(gameObject);
         }
     }
 
@@ -69,23 +68,31 @@ public class DiscordController : MonoBehaviour
                 Debug.Log("join + " + secret);
                 Client.instance.ConnectToServer(secret.Split(':')[0], int.Parse(secret.Split(':')[1]));
             };
-            //activityManager.OnActivityJoinRequest += (ref Discord.User user) =>
-            //{
-            //    Debug.Log("joinrequest");
-            //    activityManager.SendInvite(user.Id, Discord.ActivityActionType.Join, "Come play!", (result) =>
-            //    {
-            //        Debug.Log(result);
-            //    });
-            //};
+
+            GameManager.instance.MainMenuLoaded += OnMainMenuLoaded;
         }
         catch (Exception discordException)
         {
             Debug.LogError(discordException);
         }
+    }
 
-        AsyncOperation sceneLoadAsyncOperation;
-        sceneLoadAsyncOperation = SceneManager.LoadSceneAsync(1, LoadSceneMode.Single);
-        sceneLoadAsyncOperation.completed += OnMainMenuLoaded;
+    private void OnDestroy()
+    {
+        if (discord == null)
+        {
+            return;
+        }
+
+        try
+        {
+            GameManager.instance.MainMenuLoaded -= OnMainMenuLoaded;
+            discord.Dispose();
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError(exception);
+        }
     }
 
     private void OnMainMenuLoaded(AsyncOperation asyncOperation)
@@ -99,30 +106,11 @@ public class DiscordController : MonoBehaviour
         details = "";
         largeImageTooltip = "";
         UpdateActivity();
-
-        UIManager.instance.OnMainMenuLoaded();
     }
 
     private void LogProblemsFunction(Discord.LogLevel level, string message)
     {
         Debug.Log($"Discord:{level} - {message}");
-    }
-
-    private void OnApplicationQuit()
-    {
-        if (discord == null)
-        {
-            return;
-        }
-
-        try
-        {
-            discord.Dispose();
-        }
-        catch (Exception exception)
-        {
-            Debug.LogError(exception);
-        }
     }
 
     private void Update()

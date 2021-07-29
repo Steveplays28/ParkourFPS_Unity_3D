@@ -10,8 +10,6 @@ public class PlayerManager : EntityManager
     public CameraController cameraController;
 
     [Header("Player stats")]
-    public string username;
-
     private float cameraRotateSpeed = 0.5f;
     private float cameraRotationAmount = 15f;
     #endregion

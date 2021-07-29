@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 
 public class Client : MonoBehaviour
 {
+    #region Variables
     public static Client instance;
     public static int dataBufferSize = 4096;
 
@@ -19,6 +20,7 @@ public class Client : MonoBehaviour
 
     private delegate void PacketHandler(Packet _packet);
     private static Dictionary<int, PacketHandler> packetHandlers;
+    #endregion
 
     private void Awake()
     {
@@ -366,7 +368,6 @@ public class Client : MonoBehaviour
             if (isQuittingGame == false)
             {
                 SceneManager.LoadSceneAsync(1, LoadSceneMode.Single);
-                UIManager.instance.OnDisconnected();
             }
         }
     }

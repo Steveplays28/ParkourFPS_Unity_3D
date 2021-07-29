@@ -7,6 +7,7 @@ using System.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
@@ -14,6 +15,7 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    #region Variables
     public static UIManager instance;
 
     [Space]
@@ -87,19 +89,23 @@ public class UIManager : MonoBehaviour
     [Foldout("HUD")]
     public Slider healthBar;
     [Foldout("HUD")]
-    public Text weaponName;
+    public TMP_Text weaponName;
     [Foldout("HUD")]
-    public Text ammoCounter;
+    public TMP_Text ammoCounter;
     [Foldout("HUD")]
     public Volume volume;
+    [Foldout("HUD")]
+    public GameObject scoreboard;
+    [Foldout("HUD")]
+    public bool isScoreboardActive;
 
     [Foldout("Notifications")]
     public GameObject notificationPrefab;
     [Foldout("Notifications")]
     public int maxNotifications = 10;
     public Dictionary<int, Notification> notifications = new Dictionary<int, Notification>();
+    #endregion
 
-    #region Singleton pattern
     private void Awake()
     {
         if (instance == null)
@@ -109,17 +115,17 @@ public class UIManager : MonoBehaviour
         else if (instance != this)
         {
             Debug.Log("Instance already exists, destroying object!");
-            Destroy(this);
+            Destroy(gameObject);
         }
-
-        DontDestroyOnLoad(this);
     }
-    #endregion
 
     private void Start()
     {
-        //QualitySettings.vSyncCount = 1;
         Application.targetFrameRate = SettingsManager.instance.currentFpsCap;
+
+        GameManager.instance.MainMenuLoaded += OnMainMenuLoaded;
+        GameManager.instance.PlayerConnected += OnConnected;
+        GameManager.instance.PlayerDisconnected += OnDisconnected;
 
         dataPath = Application.persistentDataPath + "/Data.txt";
         // Try to read data file from disk
@@ -137,6 +143,14 @@ public class UIManager : MonoBehaviour
         {
             Debug.LogError("Caught exception: " + e);
         }
+    }
+
+    private void OnDestroy()
+    {
+        GameManager.instance.MainMenuLoaded -= OnMainMenuLoaded;
+        GameManager.instance.PlayerConnected -= OnConnected;
+
+        ResetPostProcessingVolume();
     }
 
     private void Update()
@@ -161,9 +175,10 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void OnMainMenuLoaded()
+    public void OnMainMenuLoaded(AsyncOperation asyncOperation)
     {
         normalCamera.GetUniversalAdditionalCameraData().cameraStack.Add(UICamera);
+        volume = FindObjectOfType<Volume>();
     }
 
     #region Files
@@ -282,6 +297,7 @@ public class UIManager : MonoBehaviour
     {
         currentOpenMenu = menu;
         menu.SetActive(true);
+        EventSystem.current.GetComponent<EventSystem>().SetSelectedGameObject(menu.GetComponentInChildren<Button>().gameObject);
         menu.GetComponent<RectTransform>().DOScale(Vector3.one, menuPopInTime).onComplete = () =>
         {
             foreach (Button button in menu.GetComponentsInChildren<Button>())
@@ -464,8 +480,21 @@ public class UIManager : MonoBehaviour
         Client.instance.Disconnect(false);
     }
 
-    public void OnDisconnected()
+    public void OnDisconnected(int playerId, string reason)
     {
+
+        if (GameManager.gameObjects.TryGetValue(playerId, out GameObject fetchedGameObject))
+        {
+            PlayerManager player = fetchedGameObject.GetComponent<PlayerManager>();
+
+            DisplayNotification(player.username + " has left the game. Reason: " + reason);
+        }
+
+        if (Client.instance.myId != playerId)
+        {
+            return;
+        }
+
         // Disable in-game UI
         background.GetComponentInChildren<Image>().DOFade(1, menuPopInTime);
         inGameUI.SetActive(false);
@@ -506,6 +535,35 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void ToggleScoreboard(bool enable)
+    {
+        volume.sharedProfile.TryGet(out DepthOfField depthOfField);
+
+        if (enable)
+        {
+            scoreboard.GetComponent<RectTransform>().localScale = Vector3.one;
+            depthOfField.focusDistance.value = 0.1f;
+
+            isScoreboardActive = true;
+        }
+        else
+        {
+            scoreboard.GetComponent<RectTransform>().localScale = Vector3.zero;
+            depthOfField.focusDistance.value = 15;
+
+            isScoreboardActive = false;
+        }
+    }
+
+    public void ResetPostProcessingVolume()
+    {
+        volume.sharedProfile.TryGet(out DepthOfField depthOfField);
+        depthOfField.focusDistance.value = 15;
+
+        volume.profile.TryGet(out Vignette vignette);
+        vignette.intensity.value = 0;
+    }
+
     public void UpdateWeapon()
     {
         if (GameManager.gameObjects.TryGetValue(Client.instance.myId, out GameObject fetchedGameObject))
@@ -532,9 +590,7 @@ public class UIManager : MonoBehaviour
         {
             PlayerManager player = fetchedGameObject.GetComponent<PlayerManager>();
 
-            Vignette vignette;
-            volume.profile.TryGet(out vignette);
-
+            volume.profile.TryGet(out Vignette vignette);
             DOTween.To(() => vignette.intensity.value, x => vignette.intensity.value = x, 1 - player.currentHealth / 100, 0.5f);
         }
     }

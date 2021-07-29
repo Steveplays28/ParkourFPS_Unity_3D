@@ -3,20 +3,28 @@ using UnityEngine.UI;
 
 public class EntityManager : MonoBehaviour
 {
+    #region Variables
     [Header("References")]
     public new Camera camera;
 
+    [Space]
     public Text nameTag;
     public MeshRenderer model;
     public MeshRenderer glassesModel;
 
+    [Space]
     public WeaponManager weaponManager;
     public WeaponManager[] weaponManagers;
     public int currentWeaponId;
 
     [Header("Entity stats")]
     public int id;
+    public string username;
+
+    [Space]
     public float lerpTime = 0.20f;
+
+    [Space]
     public float currentHealth;
     public float maxHealth = 100f;
     public int itemCount = 0;
@@ -25,6 +33,7 @@ public class EntityManager : MonoBehaviour
     public int kills;
     public int deaths;
     public int assists;
+    #endregion
 
     #region Health
     public virtual void Hit(GameObject hitBy, float amount)

@@ -24,6 +24,11 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            UIManager.instance.ToggleScoreboard(!UIManager.instance.isScoreboardActive);
+        }
+
         //Running
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
